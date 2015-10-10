@@ -264,7 +264,7 @@ function K2_one_iteration_discretization(order,u,data_matrix,continuous_index,cu
                         iteration_list = []
                         for j = 1 : i-1
                                 if ~(j in current_parent)
-                                        iteration_list = [iteration_list,j]
+                                        iteration_list = [iteration_list;j]
                                 end
                         end
 
@@ -275,7 +275,7 @@ function K2_one_iteration_discretization(order,u,data_matrix,continuous_index,cu
 
                         for j = 1 : length(iteration_list)
 
-                                iteration_parent = [current_parent,iteration_list[j]]
+                                iteration_parent = [current_parent;iteration_list[j]]
                                 iteration_parent_data = data_discretized[:,iteration_parent[1]]
                                 #if i ==4 ; println(iteration_parent); end;
 
