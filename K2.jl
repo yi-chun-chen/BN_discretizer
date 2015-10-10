@@ -7,7 +7,7 @@ function rand_seq(N)
         seq = Array(Int64,N)
 
         i = 1
-        seq[1] = 1 + int(div(N * rand(),1))
+        seq[1] = 1 + round(Int64, div(N * rand(),1) )
 
         while i < N
                 number = 1 + int(div(N * rand(),1))
@@ -29,15 +29,16 @@ function K2_f(x,parent)
         carti_set = [tuple(unique(parent[:,1])...)]
 
         for i = 2 : n
-                carti_set = [carti_set,tuple(unique(parent[:,i])...)]
+                carti_set = [carti_set;tuple(unique(parent[:,i])...)]
         end
 
         uni_x = unique(x); r = length(uni_x)
-        carti_set = [carti_set,tuple(uni_x...)]
+        carti_set = [carti_set;tuple(uni_x...)]
 
         CP = cartesian_product(carti_set)
 
         r_p = length(CP[:,1]) / r
+        r_p = round(Int64,r_p)
 
         # Survey distribution
         count = zeros(Int64,length(CP[:,1]))
@@ -52,7 +53,7 @@ function K2_f(x,parent)
         end
 
         # Sum over same parent value
-        count_p = zeros(Int64,int(r_p))
+        count_p = zeros(Int64,r_p)
         for i = 1 : r_p
                 count_pp = 0
                 for j = 1 : r
@@ -64,7 +65,7 @@ function K2_f(x,parent)
 
         # Evaluate
         f = 0
-        for i = 1 : int(r_p)
+        for i = 1 : r_p
                 f += lfact(count_p[i]+r-1) - lfact(r-1)
         end
         for i = 1 : length(CP[:,1])

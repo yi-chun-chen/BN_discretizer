@@ -57,7 +57,7 @@ function BN_discretizer_p_data_model(data_matrix,parent_set,child_spouse_set)
         # -log(P(D|M)) part:
 
         log_P_data_model = zeros(Float64,N,N)
-        nearest_var_set = [parent_set,child_spouse_set]
+        nearest_var_set = [parent_set;child_spouse_set]
 
         for ind_parent = 1 : n_p
                 table = 0
@@ -82,7 +82,7 @@ function BN_discretizer_p_data_model(data_matrix,parent_set,child_spouse_set)
                         # A child has more than 2 parents
                         child = child_spouse_set[ind_child][1]
                         child_data = data_matrix[:,child]
-                        spouse_set = child_spouse_set[ind_child][2:]
+                        spouse_set = child_spouse_set[ind_child][2:end]
                         spouse_matrix = Array(Int64,N,length(spouse_set))
                         for spouse_index = 1 : length(spouse_set)
                                 spouse_matrix[:,spouse_index] = data_matrix[:,spouse_set[spouse_index]]
@@ -502,7 +502,7 @@ function BN_discretizer_p_data_model_v2(continuous,data_matrix,parent_set,child_
                         # A child has more than 2 parents
                         child = child_spouse_set[ind_child][1]
                         child_data = data_matrix[:,child]
-                        spouse_set = child_spouse_set[ind_child][2:]
+                        spouse_set = child_spouse_set[ind_child][2:end]
                         spouse_matrix = Array(Int64,N,length(spouse_set))
                         for spouse_index = 1 : length(spouse_set)
                                 spouse_matrix[:,spouse_index] = data_matrix[:,spouse_set[spouse_index]]

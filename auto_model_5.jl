@@ -73,4 +73,4 @@ times = 3
 #X = BN_discretizer_iteration(data,graph,discrete_index,continuous_index,times)
 
 
-K2_w_discretization(data,2,[2,3,4,5,6],3,10)
+K2_w_discretization(data,2,[2,3,4,5,6],3,5)

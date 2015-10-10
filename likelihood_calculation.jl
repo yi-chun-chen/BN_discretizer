@@ -72,7 +72,7 @@ function condi_prob_table(data_matrix,prior_number=0)
         for i = 1 : M
                 uniq_classes[i] = unique(data_matrix[:,i])
                 n_class[i] = length(uniq_classes[i])
-                uniq_classes_tuple[i] = tuple([1:1:n_class[i]]...)
+                uniq_classes_tuple[i] = tuple([1:1:n_class[i]]...)  ##### Might cause problem
         end
 
         # Count events
@@ -128,7 +128,7 @@ data_matrix =[
 ]
 
 data_matrix_2 = [1;1;2];
-TT = condi_prob_table(data_matrix)
+#TT = condi_prob_table(data_matrix)
 
 #cartesian_product([(1,2),(4,5),(6,7)])
 
