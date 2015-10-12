@@ -24,4 +24,5 @@ for i = 1 : 345
 end
 
 close(f)
-K2_w_discretization(data,2,[1,2,3,4,5,6],2,5,false)
+
+X = K2_w_discretization_compare(data,2,[1,2,3,4,5,6],6,5)

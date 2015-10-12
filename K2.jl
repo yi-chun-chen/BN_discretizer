@@ -393,46 +393,82 @@ function K2_w_discretization(data_matrix,u,continuous_index,times,cut_time,appro
         return (score,graph,disc_edge)
 end
 
-data_1 = [
-1 0 0;
-1 1 1;
-0 0 1;
-1 1 1;
-0 0 0;
-0 1 1;
-1 1 1;
-0 0 0;
-1 1 1;
-0 0 0]
+function K2_w_discretization_compare(data_matrix,u,continuous_index,times,cut_time)
 
-data_2 = [
-1 2 1 9;
-1 2 1 9;
-1 2 1 9;
-1 2 2 9;
-2 2 2 9;
-2 1 2 8;
-2 1 2 8;
-2 1 2 8;
-2 1 2 9;
-2 1 1 8]
+        score_w = Inf
+        score_wo = Inf
+        graph_w = 0
+        graph_wo = 0
+        disc_edge_w = 0
+        disc_edge_wo = 0
+        same_result = 0
+        for time = 1 : times
+                # Produce random sequence of indexes
+                println(("Iteration time =",time,"========================="))
+                order = rand_seq(length(data_matrix[1,:]))
+                iteration_result_w_approx  = K2_one_iteration_discretization(order,u,data_matrix,continuous_index,cut_time)
+                iteration_result_wo_approx = K2_one_iteration_discretization(order,u,data_matrix,continuous_index,cut_time,false)
+                if iteration_result_w_approx[1] == iteration_result_wo_approx[1]
+                        same_result += 1
+                end
 
-data_3 = Array(Any,10,5)
-data_3[:,1:4] = data_2
-data_3[:,5] = [
-1.1;
-2.2;
-3.3;
-4.4;
-5.5;
-6.6;
-7.7;
-8.0;
-8.8;
-9.9]
+                if iteration_result_w_approx[1] < score_w
+                        score_w = iteration_result_w_approx[1]
+                        graph_w = iteration_result_w_approx[2]
+                        disc_edge_w = iteration_result_w_approx[3]
+                end
 
-data_3_discretized = Array(Int64,10,5)
-data_3_discretized[:,1:4] = data_2
-data_3_discretized[:,5] = [1,1,1,2,2,2,3,3,3,3]
+                if iteration_result_wo_approx[1] < score_wo
+                        score_wo = iteration_result_wo_approx[1]
+                        graph_wo = iteration_result_wo_approx[2]
+                        disc_edge_wo = iteration_result_wo_approx[3]
+                end
+        end
+
+        return ((same_result/times),score_w,score_wo,graph_w,disc_edge_w,graph_wo,disc_edge_wo)
+end
+
+
+# data_1 = [
+# 1 0 0;
+# 1 1 1;
+# 0 0 1;
+# 1 1 1;
+# 0 0 0;
+# 0 1 1;
+# 1 1 1;
+# 0 0 0;
+# 1 1 1;
+# 0 0 0]
+
+# data_2 = [
+# 1 2 1 9;
+# 1 2 1 9;
+# 1 2 1 9;
+# 1 2 2 9;
+# 2 2 2 9;
+# 2 1 2 8;
+# 2 1 2 8;
+# 2 1 2 8;
+# 2 1 2 9;
+# 2 1 1 8]
+
+# data_3 = Array(Any,10,5)
+# data_3[:,1:4] = data_2
+# data_3[:,5] = [
+# 1.1;
+# 2.2;
+# 3.3;
+# 4.4;
+# 5.5;
+# 6.6;
+# 7.7;
+# 8.0;
+# 8.8;
+# 9.9]
+
+# data_3_discretized = Array(Int64,10,5)
+# data_3_discretized[:,1:4] = data_2
+# data_3_discretized[:,5] = [1,1,1,2,2,2,3,3,3,3]
 #X = K2_one_iteration([1,2,3],3,data)
 #K2_one_iteration_discretization([4,3,5,1,2],2,data_3,[5],5)
