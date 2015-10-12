@@ -2,7 +2,7 @@ include("disc_BN_MODL.jl")
 include("likelihood_calculation.jl")
 include("MDL_principle.jl")
 
-f = open("abalone.data")
+f = open("data/abalone.data")
 
 x = readlines(f)
 data = Array(Float64,4177,9)

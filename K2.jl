@@ -10,7 +10,7 @@ function rand_seq(N)
         seq[1] = 1 + round(Int64, div(N * rand(),1) )
 
         while i < N
-                number = 1 + int(div(N * rand(),1))
+                number = 1 + round(Int64,div( N*rand(),1))
                 if ~(number in seq[1:i])
                         i += 1
                         seq[i] = number
@@ -83,15 +83,15 @@ function parent_table_to_graph(parent_table)
         for i = 1 : m
                 child = i
                 if length(parent_table[i]) == 0
-                        graph = [graph,child]
+                        graph = [graph;child]
                 else
                 parent = []
                 for j = 1 : length(parent_table[i])
-                        parent = [parent,parent_table[i][j]]
+                        parent = [parent;parent_table[i][j]]
                 end
 
                 add = [parent,child]
-                graph = [graph,tuple(add...)]
+                graph = [graph;tuple(add...)]
                 end
         end
         return graph
@@ -197,7 +197,7 @@ function K2_one_iteration(order,u,data_matrix)
 end
 
 
-function K2_one_iteration_discretization(order,u,data_matrix,continuous_index,cut_time)
+function K2_one_iteration_discretization(order,u,data_matrix,continuous_index,cut_time,approx = true)
         N = length(data_matrix[:,1])
         m = length(data_matrix[1,:]) # number of variables
         mc = length(continuous_index)
@@ -300,7 +300,7 @@ function K2_one_iteration_discretization(order,u,data_matrix,continuous_index,cu
                                 println((i,"th varaible"))
                                 current_graph = parent_table_to_graph(parent_table)
                                 disc_result = BN_discretizer_iteration_converge(data,current_graph,
-                                                                               disc_index,conti_index,cut_time)
+                                                                               disc_index,conti_index,cut_time,approx)
 
                                 ##### Replace data_discretized #####
 
@@ -348,12 +348,29 @@ function K2_one_iteration_discretization(order,u,data_matrix,continuous_index,cu
                 end
         end
 
+        # Disc_edge is modified to correct order
+        conti_index_correspond = Array(Any,mc,3)
+        for i = 1 : mc
+              conti_index_correspond[i,2] = continuous_index[i]
+              conti_index_correspond[i,1] = findfirst(order,continuous_index[i])
+        end
 
-        return (score,graph,disc_edge)
+        zz = sortperm(conti_index_correspond[:,1], rev = true)
+        conti_index_correspond[:,1] = conti_index_correspond[:,1][zz]
+        conti_index_correspond[:,2] = conti_index_correspond[:,2][zz]
+
+        for i = 1 : mc
+              conti_index_correspond[i,3] = disc_edge[i]
+        end
+
+        zzz = sortperm(conti_index_correspond[:,2])
+        disc_edge_result = conti_index_correspond[:,3][zzz]
+
+        return (score,graph,disc_edge_result)
 end
 
 
-function K2_w_discretization(data_matrix,u,continuous_index,times,cut_time)
+function K2_w_discretization(data_matrix,u,continuous_index,times,cut_time,approx = true)
 
         score = Inf
         graph = 0
@@ -363,7 +380,8 @@ function K2_w_discretization(data_matrix,u,continuous_index,times,cut_time)
                 # Produce random sequence of indexes
                 println(("Iteration time =",time,"========================="))
                 order = rand_seq(length(data_matrix[1,:]))
-                iteration_result = K2_one_iteration_discretization(order,u,data_matrix,continuous_index,cut_time)
+                iteration_result = K2_one_iteration_discretization(order,u,data_matrix,
+                                                          continuous_index,cut_time,approx)
 
                 if iteration_result[1] < score
                         score = iteration_result[1]
@@ -417,4 +435,4 @@ data_3_discretized = Array(Int64,10,5)
 data_3_discretized[:,1:4] = data_2
 data_3_discretized[:,5] = [1,1,1,2,2,2,3,3,3,3]
 #X = K2_one_iteration([1,2,3],3,data)
-K2_one_iteration_discretization([4,3,5,1,2],2,data_3,[5],5)
+#K2_one_iteration_discretization([4,3,5,1,2],2,data_3,[5],5)

@@ -53,7 +53,7 @@ end
 
 #graph = [1 2 (1,2,3) 4 5 6 (3,4,7) (3,8) (3,5,6,9)]
 
-function one_iteration(data,data_integer,graph,discrete_index,continuous_index,lcard)
+function one_iteration(data,data_integer,graph,discrete_index,continuous_index,lcard,approx = true)
 
 
         # Save discretization edge
@@ -77,7 +77,7 @@ function one_iteration(data,data_integer,graph,discrete_index,continuous_index,l
                         disc_edge = equal_width_edge(conti,lcard)
                         disc_edge_collect[i] = disc_edge
                 else
-                        disc_edge = BN_discretizer_free_number_rep(conti,data_integer_sort,parent_set,child_spouse_set)
+                        disc_edge = BN_discretizer_free_number_rep(conti,data_integer_sort,parent_set,child_spouse_set,approx)
                         disc_edge_collect[i] = disc_edge
                 end
 
@@ -92,7 +92,7 @@ end
 #data = Array(Any,4,4)
 #data[:,1] = [1,1,2,2]; data[:,2] = [2.2,0.9,2.1,2.3]; data[:,3] = [5,5,6,7]; data[:,4] = [3,4,4,4];
 
-function BN_discretizer_iteration(data,graph,discrete_index,continuous_index,times)
+function BN_discretizer_iteration(data,graph,discrete_index,continuous_index,times,approx = true)
         # intital the first data_integer
         l_card = 0
         for i = 1 : length(discrete_index)
@@ -118,7 +118,7 @@ function BN_discretizer_iteration(data,graph,discrete_index,continuous_index,tim
 
         # iteration for times
         for i = 1 : times
-            X = one_iteration(data,data_integer,graph,discrete_index,continuous_index,l_card)
+            X = one_iteration(data,data_integer,graph,discrete_index,continuous_index,l_card,approx)
             data_integer = X[1]
             disc_edge_collect = X[2]
 
@@ -132,7 +132,7 @@ function BN_discretizer_iteration(data,graph,discrete_index,continuous_index,tim
         return disc_edge_collect
 end
 
-function BN_discretizer_iteration_converge(data,graph,discrete_index,continuous_index,cut_time)
+function BN_discretizer_iteration_converge(data,graph,discrete_index,continuous_index,cut_time,approx = true)
         # intital the first data_integer
         l_card = 0
         for i = 1 : length(discrete_index)
@@ -170,7 +170,7 @@ function BN_discretizer_iteration_converge(data,graph,discrete_index,continuous_
             println(("iteration times = ",times))
             disc_edge_previous = disc_edge_collect
 
-            X = one_iteration(data,data_integer,graph,discrete_index,continuous_index,l_card)
+            X = one_iteration(data,data_integer,graph,discrete_index,continuous_index,l_card,approx)
             data_integer = X[1]
             disc_edge_collect = X[2]
 

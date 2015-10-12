@@ -3,7 +3,7 @@ include("likelihood_calculation.jl")
 include("iteration_2.jl")
 include("K2.jl")
 
-f = open("auto-mpg.csv")
+f = open("data\auto-mpg.csv")
 #g = open("auto_model_density.m","w")
 x = readline(f)
 x = split(x,"\r")
@@ -73,4 +73,4 @@ times = 3
 #X = BN_discretizer_iteration(data,graph,discrete_index,continuous_index,times)
 
 
-K2_w_discretization(data,2,[2,3,4,5,6],40,5)
+K2_w_discretization(data,2,[2,3,4,5,6],1,5,false)

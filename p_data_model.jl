@@ -172,3 +172,10 @@ spouse2 = [3,4,3,3,3,4,5,5,4,4]
 log_prob_spouse_child_data(child1,spouse12)
 #log_prob_single_edge_last_term(child1)
 
+parent_matrix = [
+  1 1 1;
+  1 2 2;
+  2 1 1;
+  2 3 2;
+  1 2 2;
+  3 1 2];

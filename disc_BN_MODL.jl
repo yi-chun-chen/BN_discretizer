@@ -34,7 +34,7 @@ end
 #        return total_class
 #end
 
-function BN_discretizer_p_data_model(data_matrix,parent_set,child_spouse_set)
+function BN_discretizer_p_data_model(data_matrix,parent_set,child_spouse_set,approx = true)
 
         N = length(data_matrix[:,1])
         n = length(data_matrix[1,:])
@@ -50,20 +50,31 @@ function BN_discretizer_p_data_model(data_matrix,parent_set,child_spouse_set)
                 end
 
                 parent_class_number_2 = parent_class_combine(data_matrix,parent_set)
-
-                #println(("parent #",parent_class_number,parent_class_number_2))
         end
 
         # -log(P(D|M)) part:
 
         log_P_data_model = zeros(Float64,N,N)
         nearest_var_set = [parent_set;child_spouse_set]
-
+        if approx == true
         for ind_parent = 1 : n_p
                 table = 0
                 single_variable_data = data_matrix[:,parent_set[ind_parent]]
                 table = log_prob_single_edge_last_term(single_variable_data)
                 log_P_data_model += table
+        end
+
+        else
+                if n_p > 0
+                table = 0
+                parent_data = Array(Int64,N,n_p)
+                for p = 1 : n_p
+                        parent_data[:,p] = data_matrix[:,parent_set[p]]
+                end
+                combined_parent = combine_spouses_data(parent_data)
+                table = log_prob_single_edge_last_term(combined_parent)
+                log_P_data_model += table
+                end
         end
 
         for ind_child = 1 : n_c
@@ -250,8 +261,8 @@ end
 ##### Allow repetion #####
 
 
-function BN_discretizer_free_number_rep(continuous,data_matrix,parent_set,child_spouse_set)
-        p_data_model = BN_discretizer_p_data_model(data_matrix,parent_set,child_spouse_set)
+function BN_discretizer_free_number_rep(continuous,data_matrix,parent_set,child_spouse_set,approx = true)
+        p_data_model = BN_discretizer_p_data_model(data_matrix,parent_set,child_spouse_set,approx)
         #lambda = div(largest_class_value(data_matrix),2)
         lambda = largest_class_value(data_matrix)
         split_on_intval = prior_of_intval(continuous,lambda)
@@ -316,7 +327,7 @@ function BN_discretizer_free_number_rep(continuous,data_matrix,parent_set,child_
                                         if b == a
                                                 current_disc = [conti_tail[a]]
                                         else
-                                                current_disc = [optimal_disc[b],conti_tail[a]]
+                                                current_disc = [optimal_disc[b];conti_tail[a]]
                                         end
                                 end
                         end
