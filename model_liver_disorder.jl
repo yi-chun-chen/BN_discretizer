@@ -25,4 +25,4 @@ end
 
 close(f)
 
-X = K2_w_discretization_compare(data,2,[1,2,3,4,5,6],6,5)
+X = K2_w_discretization_compare(data,2,[1,2,3,4,5,6],50,5)
