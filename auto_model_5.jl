@@ -72,5 +72,8 @@ times = 3
 
 #X = BN_discretizer_iteration(data,graph,discrete_index,continuous_index,times)
 
-
-X = K2_w_discretization_compare(data,2,[2,3,4,5,6],20,5)
+graph = [1,(1,6),(1,6,5),(1,6,3),(1,6,7),(1,5,4),(1,6,2)];
+#X = K2_w_discretization_compare(data,2,[2,3,4,5,6],20,5)
+disc_edge = BN_discretizer_iteration_converge(data,graph,[1,7],[2,3,4,5,6],10)
+disc_edge = disc_edge[2]
+Y = sample_from_discetization(graph,data,[2,3,4,5,6],disc_edge[2],300)

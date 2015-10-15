@@ -1,3 +1,5 @@
+include("distrib_generator.jl")
+
 function cartesian_product(product_set)
         N = length(product_set)
         M = 1
@@ -37,6 +39,31 @@ function cartesian_product(product_set)
         return product_returned
 end
 
+function find_intval(x,disc)
+        for i = 1 : length(disc)-1
+               if (x >= disc[i])&(x < disc[i+1])
+                       return i
+               end
+        end
+end
+
+function sampling_from_CPT(intval)
+        x = rand()
+        cum_intval = Array(Float64,1+length(intval))
+        cum_intval[1] = 0
+        for i = 1 : length(intval)
+                cum_intval[i+1] = cum_intval[i] + intval[i]
+        end
+        #println(x)
+        for i = 1 : length(intval)
+                if (cum_intval[i]<x)&(x <= cum_intval[i+1])
+                        return i
+                end
+        end
+        if x < Inf
+                return length(intval)
+        end
+end
 
 function condi_prob_table(data_matrix,prior_number=0)
         # Initialization
@@ -109,25 +136,7 @@ function condi_prob_table(data_matrix,prior_number=0)
 
 end
 
-
-
-
-data_matrix =[
-[1 3 6 1];
-[2 4 7 1];
-[2 4 6 1];
-[1 3 6 1];
-[1 3 5 1];
-[1 4 6 2];
-[1 4 5 2];
-[2 4 7 2];
-[2 4 6 1];
-[2 4 7 1];
-[1 3 6 2];
-[2 3 6 1];
-]
-
-data_matrix_2 = [1;1;2];
+#data_matrix_2 = [1;1;2];
 #TT = condi_prob_table(data_matrix)
 
 #cartesian_product([(1,2),(4,5),(6,7)])
@@ -184,10 +193,9 @@ function likelihood(graph,train_data,new_data,prior_number=0)
         return LH
 end
 
-#X = likelihood([1, (1,4)],data_matrix,data_matrix)
-
-function continuous_to_discrete(data,bin_edge)
+function continuous_to_discrete(data,bin_edge_1)
         #bin_edge_extend
+        bin_edge = copy(bin_edge_1)
         bin_edge[1] = -Inf
         bin_edge[end] = Inf
         data_discrete = Array(Int64,length(data))
@@ -202,3 +210,185 @@ function continuous_to_discrete(data,bin_edge)
         end
         return data_discrete
 end
+
+
+function likelihood_conti(graph,train_data,continuous_index,disc_edge,new_data,prior_number=0)
+        # graph consists of tuple elements that has the form (a,b,c,d), where a,b,c are parents of d.
+        num_of_condi = length(graph)
+        condi_collection = Array(Any,num_of_condi)
+
+        train_data_discretized = Array(Int64,size(train_data))
+        for i = 1 : length(train_data[1,:])
+                if i in continuous_index
+                        index_in_disc_edge = findfirst(continuous_index,i)
+                        train_data_discretized[:,i] = continuous_to_discrete(train_data[:,i],
+                                                                              disc_edge[index_in_disc_edge])
+                else
+                        train_data_discretized[:,i] = train_data[:,i]
+                end
+        end
+
+        for i = 1 : num_of_condi
+                subgraph = graph[i]
+                sub_data_matrix = Array(Int64,length(train_data[:,1]),length(subgraph))
+                sub_data_matrix[:,1] = train_data_discretized[:,subgraph[1]]
+
+                for j = 2 : length(subgraph)
+                        sub_data_matrix[:,j] = train_data_discretized[:,subgraph[j]]
+                end
+
+                condi_collection[i] = condi_prob_table(sub_data_matrix,prior_number)
+        end
+
+        uniq_classes = Array(Any,length(train_data_discretized[1,:]))
+
+        for i = 1 : length(train_data[1,:])
+                uniq_classes[i] = unique(train_data_discretized[:,i])
+        end
+
+        LH = 0
+
+        for i = 1 : length(new_data[:,1])
+                LH_current = 0
+                index_set = Array(Int64,length(new_data[1,:]))
+
+
+                for j = 1 : length(index_set)
+                        if j in continuous_index
+                                index_in_disc_edge = findfirst(continuous_index,j)
+                                index_intval = find_intval(new_data[i,j],disc_edge[index_in_disc_edge])
+                                index_set[j] = findfirst(uniq_classes[j],index_intval)
+
+                        else
+                                index_set[j] = findfirst(uniq_classes[j],new_data[i,j])
+                        end
+                end
+
+                for g_ind = 1 : num_of_condi
+
+                        sub_ind_set = Array(Int64,length(graph[g_ind]))
+
+                        for k = 1 : length(graph[g_ind])
+                                sub_ind_set[k] = index_set[graph[g_ind][k]]
+                        end
+                        sub_ind_set = tuple(sub_ind_set...)
+
+                        p = condi_collection[g_ind][sub_ind_set...]
+
+                        LH_current += log(p)
+                        println(p)#if g_ind == 3; println(LH_current) ;end;
+                        # Make a modification to continuous case
+                        if (graph[g_ind][end] in continuous_index)
+                                l = graph[g_ind][end]
+                                index_in_disc_edge = findfirst(continuous_index,l)
+                                index_intval = find_intval(new_data[i,l],disc_edge[index_in_disc_edge])
+                                span = disc_edge[index_in_disc_edge][index_intval+1] - disc_edge[index_in_disc_edge][index_intval]
+                                LH_current -= log(span)
+                        end
+                        #if g_ind == 3; println(LH_current) ;end;
+                end
+
+                LH += LH_current
+        end
+
+        return LH
+end
+
+data_matrix_conti =[
+[1 3 1.1 7.0 1];
+[2 4 1.2 3.4 1];
+[2 4 2.1 6.4 1];
+[1 3 2.5 6.1 1];
+[1 3 3.1 5.9 1];
+[1 4 4.2 6.9 2];
+[1 4 5.5 5.1 2];
+[2 4 6.6 7.9 2];
+[2 4 7.2 6.2 1];
+[2 4 2.1 7.3 1];
+[1 3 3.1 6.7 1];
+[2 3 4.2 6.7 1];
+]
+#continuous_index = [3,4];
+#disc_edge = Array(Any,2)
+#disc_edge[1] = [1.1,5.0,7.2]
+#disc_edge[2] = [3.4,5.5,6.5,7.9]
+
+
+
+function sample_from_discetization(graph,train_data,continuous_index,disc_edge,number_of_samples,prior_number = 0)
+        num_of_condi = length(graph)
+        condi_collection = Array(Any,num_of_condi)
+
+        train_data_discretized = Array(Int64,size(train_data))
+        for i = 1 : length(train_data[1,:])
+                if i in continuous_index
+                        index_in_disc_edge = findfirst(continuous_index,i)
+                        train_data_discretized[:,i] = continuous_to_discrete(train_data[:,i],
+                                                                              disc_edge[index_in_disc_edge])
+                else
+                        train_data_discretized[:,i] = train_data[:,i]
+                end
+        end
+
+        for i = 1 : num_of_condi
+                subgraph = graph[i]
+                sub_data_matrix = Array(Int64,length(train_data[:,1]),length(subgraph))
+                sub_data_matrix[:,1] = train_data_discretized[:,subgraph[1]]
+
+                for j = 2 : length(subgraph)
+                        sub_data_matrix[:,j] = train_data_discretized[:,subgraph[j]]
+                end
+
+                condi_collection[i] = condi_prob_table(sub_data_matrix,prior_number)
+        end
+
+        uniq_classes = Array(Any,length(train_data_discretized[1,:]))
+
+        for i = 1 : length(train_data[1,:])
+                uniq_classes[i] = unique(train_data_discretized[:,i])
+        end
+
+        # Generate Data
+        generate_data = Array(Any,number_of_samples, length(train_data[1,:]))
+        for s = 1 : number_of_samples
+                new_data_in_real = Array(Any,length(train_data[1,:]))
+                new_data_in_uniq = Array(Int64,length(train_data[1,:]))
+                for i = 1 : num_of_condi
+                        if length(graph[i]) == 1
+                                j = graph[i]
+                                new_data_in_uniq[j] = sampling_from_CPT(condi_collection[i])
+                        else
+                                parent_data = Array(Int64,length(graph[i])-1)
+                                for j = 1 : length(graph[i])-1
+                                        parent_data[j] = new_data_in_uniq[graph[i][j]]
+
+                                end
+                                p_data = tuple(parent_data...)
+                                CPT_ori = condi_collection[i][p_data...,:]
+                                CPT = Array(Float64,length(CPT_ori))
+                                for k = 1 : length(CPT_ori)
+                                        CPT[k] = condi_collection[i][p_data...,k]
+                                end
+                                j = graph[i][end]
+                                new_data_in_uniq[j] = sampling_from_CPT(CPT); #return new_data_in_uniq[i]
+                        end
+                        #if i == 1 ; return new_data_in_uniq[i];end;
+                end
+                #return new_data_in_uniq
+                # transform back to real data values
+                for i = 1 : length(new_data_in_uniq)
+                        if i in continuous_index
+                                intval_index = uniq_classes[i][new_data_in_uniq[i]]
+                                disc = disc_edge[findfirst(continuous_index,i)]
+                                new_data_in_real[i] = uniform_distrib_single(disc[intval_index],disc[intval_index+1])
+                        else
+                                new_data_in_real[i] = uniq_classes[i][new_data_in_uniq[i]]
+                        end
+                end
+                generate_data[s,:] = new_data_in_real;
+        end
+        return generate_data
+end
+
+#X = likelihood_conti([3,(3,4),1,(3,2),(3,4,5)],data_matrix_conti,continuous_index,disc_edge,[1 3 6.0 7.2 1],1)
+#X = sample_from_discetization([3,(3,4),1,(4,2),(3,4,5)],data_matrix_conti,continuous_index,disc_edge,2)

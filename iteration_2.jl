@@ -34,7 +34,7 @@ function graph_to_markov(graph,target)
                                                 spouse = [spouse,condi_graph[j]]
                                         end
                                 end
-                                child_spouse_set = [child_spouse_set,tuple([child,spouse]...)]
+                                child_spouse_set = [child_spouse_set,tuple([child,spouse]...)] ###### change to ; ######
 
                         end
                 else
