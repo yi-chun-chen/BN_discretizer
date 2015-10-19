@@ -429,46 +429,22 @@ function K2_w_discretization_compare(data_matrix,u,continuous_index,times,cut_ti
 end
 
 
-# data_1 = [
-# 1 0 0;
-# 1 1 1;
-# 0 0 1;
-# 1 1 1;
-# 0 0 0;
-# 0 1 1;
-# 1 1 1;
-# 0 0 0;
-# 1 1 1;
-# 0 0 0]
+function K2(data_matrix,u,times)
 
-# data_2 = [
-# 1 2 1 9;
-# 1 2 1 9;
-# 1 2 1 9;
-# 1 2 2 9;
-# 2 2 2 9;
-# 2 1 2 8;
-# 2 1 2 8;
-# 2 1 2 8;
-# 2 1 2 9;
-# 2 1 1 8]
+        score = Inf
+        graph = 0
 
-# data_3 = Array(Any,10,5)
-# data_3[:,1:4] = data_2
-# data_3[:,5] = [
-# 1.1;
-# 2.2;
-# 3.3;
-# 4.4;
-# 5.5;
-# 6.6;
-# 7.7;
-# 8.0;
-# 8.8;
-# 9.9]
+        for time = 1 : times
+                # Produce random sequence of indexes
+                println(("Iteration time =",time,"========================="))
+                order = rand_seq(length(data_matrix[1,:]))
+                result = K2_one_iteration(order,u,data_matrix)
 
-# data_3_discretized = Array(Int64,10,5)
-# data_3_discretized[:,1:4] = data_2
-# data_3_discretized[:,5] = [1,1,1,2,2,2,3,3,3,3]
-#X = K2_one_iteration([1,2,3],3,data)
-#K2_one_iteration_discretization([4,3,5,1,2],2,data_3,[5],5)
+                if result[2] < score
+                        score = result[2]
+                        graph = result[1]
+                end
+        end
+
+        return (score,graph)
+end
