@@ -1,4 +1,5 @@
 include("disc_BN_MODL.jl")
+include("MDL_principle.jl")
 
 function disc_intval_seq(table)
         N = length(table)
@@ -171,6 +172,131 @@ function BN_discretizer_iteration_converge(data,graph,discrete_index,continuous_
             disc_edge_previous = disc_edge_collect
 
             X = one_iteration(data,data_integer,graph,discrete_index,continuous_index,l_card,approx)
+            data_integer = X[1]
+            disc_edge_collect = X[2]
+
+        end
+
+        return (data_integer,disc_edge_collect)
+end
+
+
+function MDL_one_iteration(data,data_integer,graph,discrete_index,continuous_index,lcard)
+
+
+        # Save discretization edge
+        disc_edge_collect = Array(Any,length(continuous_index))
+
+        for i = 1 : length(continuous_index)
+                target = continuous_index[i]
+                println((i,"th variable is ",target))
+
+                increase_order = sortperm(data[:,target])
+                conti = data[:,target][increase_order]
+                data_integer_sort = Array(Int64,size(data))
+
+                # sort data_integer properly
+                for j = 1 : length(data_integer[1,:])
+                        data_integer_sort[:,j] = data_integer[:,j][increase_order]
+                end
+                sets = graph_to_markov(graph,target)
+                parent_set = sets[1]; child_spouse_set = sets[2];
+
+                if (length(sets[1]) + length(sets[2])) == 0
+                        disc_edge = equal_width_edge(conti,lcard)
+                        disc_edge_collect[i] = disc_edge
+                else
+                        disc_edge = MDL_discretizer_rep(conti,data_integer_sort,parent_set,child_spouse_set)[1]
+                        disc_edge_collect[i] = disc_edge
+                end
+
+                # Update by current discretization
+                data_integer[:,target] = continuous_to_discrete(data[:,target],disc_edge)
+        end
+
+
+        return (data_integer,disc_edge_collect)
+end
+
+function MDL_discretizer_iteration(data,graph,discrete_index,continuous_index,times)
+        # intital the first data_integer
+        l_card = 0
+        for i = 1 : length(discrete_index)
+                card = length(unique(data[:,discrete_index[i]]))
+                if card > l_card
+                        l_card = card
+                end
+        end
+
+        # pre-equal-width-discretize on continuous variables
+        data_integer = zeros(Int64,size(data))
+        for i = 1 : length(discrete_index)
+                index = discrete_index[i]
+                data_integer[:,index] = data[:,index]
+        end
+
+        for i = 1 : length(continuous_index)
+                index = continuous_index[i]
+                data_integer[:,index] = equal_width_disc(data[:,index],l_card)
+        end
+
+        disc_edge_collect = Array(Any,length(continuous_index))
+
+        # iteration for times
+        for i = 1 : times
+            X = MDL_one_iteration(data,data_integer,graph,discrete_index,continuous_index,l_card)
+            data_integer = X[1]
+            disc_edge_collect = X[2]
+
+            uniq_classes = Array(Int64,length(continuous_index),1)
+            for j = 1 : length(continuous_index)
+                    uniq_classes[j] = length(unique(data_integer[:,continuous_index[j]]))
+            end
+            println(uniq_classes)
+        end
+
+        return disc_edge_collect
+end
+
+function MDL_discretizer_iteration_converge(data,graph,discrete_index,continuous_index,cut_time)
+        # intital the first data_integer
+        l_card = 0
+        for i = 1 : length(discrete_index)
+                card = length(unique(data[:,discrete_index[i]]))
+                if card > l_card
+                        l_card = card
+                end
+        end
+
+        # pre-equal-width-discretize on continuous variables
+        data_integer = zeros(Int64,size(data))
+        for i = 1 : length(discrete_index)
+                index = discrete_index[i]
+                data_integer[:,index] = data[:,index]
+        end
+
+        for i = 1 : length(continuous_index)
+                index = continuous_index[i]
+                data_integer[:,index] = equal_width_disc(data[:,index],l_card)
+        end
+
+        disc_edge_collect = Array(Any,length(continuous_index))
+
+        disc_edge_previous = Array(Any,length(continuous_index))
+
+        for i = 1 : length(continuous_index)
+                disc_edge_previous[i] = []
+                disc_edge_collect[i] = [0]
+        end
+
+        times = 0
+        while (disc_edge_previous != disc_edge_collect)&(times<cut_time)
+
+            times += 1
+            println(("iteration times = ",times))
+            disc_edge_previous = disc_edge_collect
+
+            X = MDL_one_iteration(data,data_integer,graph,discrete_index,continuous_index,l_card)
             data_integer = X[1]
             disc_edge_collect = X[2]
 

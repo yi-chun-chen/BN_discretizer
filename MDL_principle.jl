@@ -40,7 +40,7 @@ function mi_child(data,c1,c2)
                 end
                 pc_distri[i] = count
         end
-
+        #println(pc_distri)
         # normalize
         p_distri = p_distri/N
         pc_distri = pc_distri/N
@@ -61,6 +61,88 @@ function mi_child(data,c1,c2)
 
         return mi
 end
+
+function mi_child_table(data)
+        N = length(data[:,1])
+        n = length(data[1,:])
+
+        # build carti product
+        carti_set = [tuple(unique(data[:,1])...)]
+
+        for i = 2 : n
+                carti_set = [carti_set,tuple(unique(data[:,i])...)]
+        end
+
+        CP = cartesian_product(carti_set)
+
+        # Distribution of parent
+        p_distri = Array(Any,length(CP[:,1]))
+
+        for i = 1 : length(CP[:,1])
+                count = 0
+                for j = 1 : N
+                        if CP[i,:] == data[j,:]
+                                count += 1
+                        end
+                end
+                p_distri[i] = count
+        end
+
+        p_distri = p_distri/N
+
+        # Distribution of all within i and j
+        pc_distri = zeros(Float64,N,N,length(CP[:,1]))
+
+        for i = 1 : N
+                for j = 1 : length(CP[:,1])
+                        if CP[j,:] == data[i,:]
+                                pc_distri[i,i,j] = 1
+                        end
+                end
+
+        end
+
+        for i = 1 : N
+                for j = i+1 : N
+                        previous = copy(pc_distri[i,j-1,:])
+                        for k = 1 : length(CP[:,1])
+                                if CP[k,:] == data[j,:]
+                                        previous[k] += 1
+                                end
+                        end
+                        pc_distri[i,j,:] = previous
+
+                end
+        end
+
+        pc_distri = pc_distri/N
+
+        # Distribution of continuous variable itsel
+        pc = Array(Float64,N,N)
+        for i = 1 : N
+                for j = 1 : N
+                        pc[i,j] = (j-i+1)/N
+                end
+        end
+
+        # MI
+        mi = zeros(Float64,N,N)
+        for i = 1 : N
+        for j = 1 : N
+                mi_current = 0
+                for k = 1 : length(CP[:,1])
+                        if pc_distri[i,j,k] != 0
+                                mi_current += pc_distri[i,j,k] * ( log(pc_distri[i,j,k]) -
+                                              log(pc[i,j]) - log(p_distri[k]))
+                        end
+                end
+                mi[i,j] = mi_current
+        end
+        end
+
+        return mi
+end
+
 
 function mi_parent(data,c1,c2)
         # first one is the child
@@ -182,6 +264,147 @@ function mi_parent(data,c1,c2)
         return mi
 end
 
+function mi_parent_table(data)
+        N = length(data[:,1])
+        n = length(data[1,:])
+
+        # p1 distri wo discretization
+        child_uniq = unique(data[:,1])
+        p1_distri = Array(Any,length(child_uniq))
+        for i = 1 : length(child_uniq)
+                count = 0
+                for j = 1 : N
+                        if child_uniq[i] == data[j,1]
+                                count += 1
+                        end
+                end
+                p1_distri[i] = count
+        end
+        p1_distri = p1_distri/N
+
+        # if there is no other variable
+        if length(data[1,:]) == 1
+
+        p2_distri = zeros(Float64,N,N,length(child_uniq))
+        for i = 1 : N
+                  for k = 1 : length(child_uniq)
+                          count = 0
+                          if child_uniq[k] == data[i,1]
+                                  count += 1
+                          end
+                          p2_distri[i,i,k] = count
+                  end
+        end
+
+       for i = 1 : N
+               for j = i+1 : N
+                       previous = copy(p2_distri[i,j-1,:])
+                       for k = 1 : length(child_uniq)
+                               if child_uniq[k] == data[j,1]
+                                       previous[k] += 1
+                               end
+                       end
+                       p2_distri[i,j,:] = previous
+                end
+        end
+        p2_distri = p2_distri/N
+
+        mi = zeros(Float64,N,N)
+        for i = 1 : N
+                for j = i : N
+                        for k = 1 : length(child_uniq)
+                                if p2_distri[i,j,k] != 0
+                                mi[i,j] += p2_distri[i,j,k] * ( log(p2_distri[i,j,k]) -
+                                          log(p1_distri[k]) - log((j-i+1)/N)      )
+                                end
+                        end
+                end
+        end
+        return mi
+        end
+
+        # the case that more than one variable for data
+        carti_set = [tuple(unique(data[:,2])...)]
+        for i = 3 : length(data[1,:])
+                carti_set = [carti_set; tuple(unique(data[:,i])...)]
+        end
+
+        CP = cartesian_product(carti_set)
+
+        # p_distribution w discri
+        p_distri = zeros(Float64,N,N,length(CP[:,1]))
+        for i = 1 : N
+                for k = 1 : length(CP[:,1])
+                        if CP[k,:] == data[i,2:end]
+                                p_distri[i,i,k] += 1
+                        end
+                end
+        end
+
+        for i = 1 : N
+                for j = i+1 : N
+                        previous = copy(p_distri[i,j-1,:])
+                        for k = 1 : length(CP[:,1])
+                                if CP[k,:] == data[j,2:end]
+                                        previous[k] += 1
+                                end
+                        end
+                        p_distri[i,j,:] = previous
+                end
+        end
+        p_distri = p_distri/N
+
+        # pc_distri w discri
+        carti_pc_set = [carti_set; tuple(child_uniq...)]
+        CP_pc = cartesian_product(carti_pc_set)
+        p_c_distri = zeros(Float64,N,N,length(CP_pc[:,1]))
+        l_c = length(CP[:,1])
+
+        for i = 1 : N
+                for k = 1 : length(CP_pc[:,1])
+                        if CP_pc[k,:] == [data[i,2:end] data[i,1]]
+                                p_c_distri[i,i,k] += 1
+                        end
+                end
+        end
+
+        for i = 1 : N
+                for j = i+1 : N
+                        previous = copy(p_c_distri[i,j-1,:])
+                        for k = 1 : length(CP_pc[:,1])
+                                if CP_pc[k,:] == [data[j,2:end] data[j,1]]
+                                        previous[k] += 1
+                                end
+                        end
+                        p_c_distri[i,j,:] = previous
+                end
+        end
+        p_c_distri = p_c_distri/N
+
+        # MI
+        mi = zeros(Float64,N,N)
+        for i = 1 : N
+                for j = i : N
+                        for k = 1 : length(CP_pc[:,1])
+                                index_c = div(k-1,l_c) + 1
+                                index_p = k%(l_c)
+                                if index_p == 0
+                                        index_p = l_c
+                                end
+
+                                if p_c_distri[i,j,k] != 0
+                                mi[i,j] += p_c_distri[i,j,k]*(
+                        log(p_c_distri[i,j,k]) - log(p1_distri[index_c]) - log(p_distri[i,j,index_p]))
+
+                                end
+                        end
+                end
+        end
+        return mi
+
+end
+
+
 function mi_table(data,parents,child_spouse_set)
         N = length(data[:,1])
         mi_tb = zeros(Float64,N,N)
@@ -222,13 +445,48 @@ function mi_table(data,parents,child_spouse_set)
         return mi_tb
 end
 
+function mi_table_2(data,parents,child_spouse_set)
+        N = length(data[:,1])
+        mi_tb = zeros(Float64,N,N)
+
+        # parent part
+        if length(parents) != 0
+                data_parent = Array(Int64,N,length(parents))
+                for k = 1 : length(parents)
+                        data_parent[:,k] = data[:,parents[k]]
+                end
+                mi_tb =  mi_child_table(data_parent)
+        end
+
+
+        # child_spouse case
+        if length(child_spouse_set) != 0
+        for k = 1 : length(child_spouse_set)
+                cs_set = child_spouse_set[k]
+                data_cs = Array(Int64,N,length(cs_set))
+                for l = 1 : length(cs_set)
+                        data_cs[:,l] = data[:,cs_set[l]]
+                end
+                mi_tb += mi_parent_table(data_cs)
+        end
+        end
+
+        # non-realistic case
+        for i = 1 : N
+                for j = 1 : i-1
+                      mi_tb[i,j] = Inf
+                end
+        end
+
+        return mi_tb
+end
 
 function H(p)
         return -p*log(p) - (1-p)*log(1-p)
 end
 
 function MDL_discretizer(continuous,data_matrix,parent_set,child_spouse_set)
-        mi_tb = mi_table(data_matrix,parent_set,child_spouse_set)
+        mi_tb = mi_table_2(data_matrix,parent_set,child_spouse_set)
         N = length(continuous)
 
         smallest_value = Array(Float64,N,N)
@@ -335,7 +593,7 @@ end
 ###############################################################
 
 function MDL_discretizer_rep(continuous,data_matrix,parent_set,child_spouse_set)
-        mi_tb = mi_table(data_matrix,parent_set,child_spouse_set)
+        mi_tb = mi_table_2(data_matrix,parent_set,child_spouse_set)
         N = length(continuous)
 
         parent_cardi = 1
@@ -413,7 +671,6 @@ function MDL_discretizer_rep(continuous,data_matrix,parent_set,child_spouse_set)
                                 for i = 1 : j-1
                                         second_piece_value = - mi_tb[conti_head[i+1],conti_tail[j]] * N
                                         temp_value = smallest_value[i,k-1] + second_piece_value
-                                        #if (k == 2) & (j == N); println(("i=",i,temp_value)); end
 
                                         if temp_value < current_value
                                                 current_value = temp_value
@@ -430,17 +687,13 @@ function MDL_discretizer_rep(continuous,data_matrix,parent_set,child_spouse_set)
         end
 
         full_length_k_intval = copy(smallest_value[Ni,:])
-        #println(("optimal_disc_2",optimal_disc[N,2]))
 
 
 
         for l = 1:Ni
-                #println((l,"------------------------------"))
-                #println(full_length_k_intval[l] )
                 full_length_k_intval[l] += l_code*parent_cardi*(l-1) + l_code*child_cardi*l +
                                            log(l) + lfact(Ni-1) - lfact(l-1) - lfact(Ni-l)
                                            #(Ni-1)*H((l-1)/(Ni-1))
-                #println(full_length_k_intval[l] )
         end
 
         #return full_length_k_intval
@@ -467,18 +720,3 @@ function MDL_discretizer_rep(continuous,data_matrix,parent_set,child_spouse_set)
         end
         return (bin_edge_value,mi_tb)
 end
-
-
-#data = zeros(Int64,20)
-#continuous = [1.0:1.0:20.0]
-#mi_child(data,1,5)
-#mi_parent(data,1,5)
-#mi_table(data,[],[1,(2,3)])
-#MDL_discretizer_rep(continuous,data,[1],[])
-
-#continuous_1 = [1.0:1.0:10.0]
-#data_1 = zeros(Int64,10)
-#for i = 6 : 10; data_1[i] = 1; end
-#MDL_discretizer(continuous_1,data_1,[1],[(2,3)])
-#5
-#mi_child(data_1,1,1)

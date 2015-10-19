@@ -1,4 +1,5 @@
 include("disc_BN_MODL.jl")
+include("MDL_principle.jl")
 include("likelihood_calculation.jl")
 include("iteration_2.jl")
 include("K2.jl")
@@ -68,12 +69,28 @@ child_spouse_set = graph_to_markov(graph,target)[2]
 
 discrete_index = [1,7]
 continuous_index = [6,5,4,3,2]
-times = 3
+times = 5
 
 #X = BN_discretizer_iteration(data,graph,discrete_index,continuous_index,times)
 
-graph = [1,(1,6),(1,6,5),(1,6,3),(1,6,7),(1,5,4),(1,6,2)];
+graph = [1,(1,4),(1,4,2),(2,1,6),(1,4,5),(4,2,7),(2,1,3)];
 #X = K2_w_discretization_compare(data,2,[2,3,4,5,6],20,5)
-disc_edge = BN_discretizer_iteration_converge(data,graph,[1,7],[2,3,4,5,6],10)
-disc_edge = disc_edge[2]
-Y = sample_from_discetization(graph,data,[2,3,4,5,6],disc_edge[2],300)
+#MY_disc_edge = BN_discretizer_iteration_converge(data,graph,[1,7],[6,5,4,3,2],5)[2]
+#disc_edge = MDL_discretizer_iteration_converge(data,graph,discrete_index,continuous_index,5)
+#disc_edge = disc_edge[2]
+MY_disc_edge = Array(Any,5)
+MY_disc_edge[5] = [8.0,14.05,24.8]
+MY_disc_edge[4] = [1613.0,2217.0,2764.5,3030.0,3657.5,5140.0]
+MY_disc_edge[3] = [9.0,17.65,22.75,28.9,46.6]
+MY_disc_edge[2] = [46.0,71.5,99.0,123.5,230.0]
+MY_disc_edge[1] = [68.0,70.5,106.0,159.5,190.5,259.0,284.5,455.0]
+
+MDL_disc_edge = Array(Any,5)
+MDL_disc_edge[5] = [8.0,13.75,24.8]
+MDL_disc_edge[4] = [1613.0,2764.5,3657.5,5140.0]
+MDL_disc_edge[3] = [9.0,46.6]
+MDL_disc_edge[2] = [46.0,84.5,99.0,123.5,230.0]
+MDL_disc_edge[1] = [68.0,455.0]
+
+Y1 = sample_from_discetization(graph,data,[2,3,4,5,6],MY_disc_edge,300)
+Y2 = sample_from_discetization(graph,data,[2,3,4,5,6],MDL_disc_edge,300)
