@@ -29,13 +29,14 @@ close(f)
 
 graph = [8,(8,5),(5,6),(8,2),(5,2,3),(8,7),(3,8,2,10),4,(10,12),(6,10,14),(14,13),(3,8,10,2,11),1,(10,11,3,2,9)];
 discrete_index = [4,9]
-continuous_index = [14,13,12,11,10,8,7,6,5,3,2,1]
-cut_time = 10
-my_disc_edge_w = BN_discretizer_iteration_converge(data,graph,discrete_index,continuous_index,cut_time)[2]
+continuous_index = [1,2,3,5,6,7,8,10,11,12,13,14]
+order = graph_to_reverse_conti_order(graph,continuous_index)
+cut_time = 8
+my_disc_edge_w = BN_discretizer_iteration_converge(data,graph,discrete_index,order,cut_time)[2]
 println("my_w_done =========================== ")
-my_disc_edge_wo = BN_discretizer_iteration_converge(data,graph,discrete_index,continuous_index,cut_time,false)[2]
+my_disc_edge_wo = BN_discretizer_iteration_converge(data,graph,discrete_index,order,cut_time,false)[2]
 println("my_wo_done =========================== ")
-MDL_disc =  MDL_discretizer_iteration_converge(data,graph,discrete_index,continuous_index,cut_time)[2]
+MDL_disc =  MDL_discretizer_iteration_converge(data,graph,discrete_index,order,cut_time)[2]
 println("MDL_done =========================== ")
 
 g = open("housing_result.txt","w")
