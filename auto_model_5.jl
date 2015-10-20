@@ -68,29 +68,28 @@ parent_set = graph_to_markov(graph,target)[1]
 child_spouse_set = graph_to_markov(graph,target)[2]
 
 discrete_index = [1,7]
-continuous_index = [6,5,4,3,2]
+continuous_index = [2,3,4,5,6]
 times = 5
 
 #X = BN_discretizer_iteration(data,graph,discrete_index,continuous_index,times)
 
-graph = [1,(1,4),(1,4,2),(2,1,6),(1,4,5),(4,2,7),(2,1,3)];
-#X = K2_w_discretization_compare(data,2,[2,3,4,5,6],20,5)
-#MY_disc_edge = BN_discretizer_iteration_converge(data,graph,[1,7],[6,5,4,3,2],5)[2]
-#disc_edge = MDL_discretizer_iteration_converge(data,graph,discrete_index,continuous_index,5)
-#disc_edge = disc_edge[2]
-MY_disc_edge = Array(Any,5)
-MY_disc_edge[5] = [8.0,14.05,24.8]
-MY_disc_edge[4] = [1613.0,2217.0,2764.5,3030.0,3657.5,5140.0]
-MY_disc_edge[3] = [9.0,17.65,22.75,28.9,46.6]
-MY_disc_edge[2] = [46.0,71.5,99.0,123.5,230.0]
-MY_disc_edge[1] = [68.0,70.5,106.0,159.5,190.5,259.0,284.5,455.0]
+graph = [1,(1,2),(2,1,3),(2,5),(1,4),(4,1,5,7),(3,6)];
+Order = graph_to_reverse_conti_order(graph,continuous_index)
 
-MDL_disc_edge = Array(Any,5)
-MDL_disc_edge[5] = [8.0,13.75,24.8]
-MDL_disc_edge[4] = [1613.0,2764.5,3657.5,5140.0]
-MDL_disc_edge[3] = [9.0,46.6]
-MDL_disc_edge[2] = [46.0,84.5,99.0,123.5,230.0]
-MDL_disc_edge[1] = [68.0,455.0]
+MY_disc_edge_2_wo_approx = Array(Any,5)
+MY_disc_edge_2_wo_approx[5] = [8.0,11.05,13.75,16.05,24.8]
+MY_disc_edge_2_wo_approx[4] = [1613.0,2468.0,2959.5,3657.5,5140.0]
+MY_disc_edge_2_wo_approx[3] = [9.0,15.25,20.9,25.65,32.05,46.6]
+MY_disc_edge_2_wo_approx[2] = [46.0,83.5,127.0,195.5,230.0]
+MY_disc_edge_2_wo_approx[1] = [68.0,109.0,159.5,259.0,284.5,414.5,455.0]
 
-Y1 = sample_from_discetization(graph,data,[2,3,4,5,6],MY_disc_edge,300)
-Y2 = sample_from_discetization(graph,data,[2,3,4,5,6],MDL_disc_edge,300)
+MY_disc_edge_2_w_approx = Array(Any,5)
+MY_disc_edge_2_w_approx[5] = [8.0,11.05,13.75,16.05,22.85,24.8]
+MY_disc_edge_2_w_approx[4] = [1613.0,2203.5,2513.0,2959.5,3657.5,5140.0]
+MY_disc_edge_2_w_approx[3] = [9.0,15.25,20.9,25.65,31.4,46.6]
+MY_disc_edge_2_w_approx[2] = [46.0,71.5,99.0,127.0,195.5,230.0]
+MY_disc_edge_2_w_approx[1] = [68.0,106.0,159.5,259.0,284.5,414.5,455.0]
+
+Y1 = sample_from_discetization(graph,data,[2,3,4,5,6],MY_disc_edge_2_w_approx,300)
+Y2 = sample_from_discetization(graph,data,[2,3,4,5,6],MY_disc_edge_2_wo_approx,300)
+close(f)

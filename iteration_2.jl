@@ -10,6 +10,27 @@ function disc_intval_seq(table)
         return seq
 end
 
+function graph_to_reverse_order(graph)
+        order = Array(Int64,length(graph))
+        for i = 1 : length(graph)
+                order[length(graph) - i + 1] = graph[i][end]
+        end
+        return order
+end
+
+function graph_to_reverse_conti_order(graph,continuous_index)
+        order = graph_to_reverse_order(graph)
+        Order = Array(Int64,length(continuous_index))
+        ind = 0
+        for i = 1 : length(order)
+                if order[i] in continuous_index
+                        ind += 1
+                        Order[ind] = order[i]
+                end
+        end
+        return Order
+end
+
 function graph_to_markov(graph,target)
         parent_set = []; child_spouse_set = [];
         for i = 1 : length(graph)
