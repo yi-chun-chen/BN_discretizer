@@ -168,7 +168,7 @@ function BN_discretizer_iteration_converge(data,graph,discrete_index,continuous_
         while (disc_edge_previous != disc_edge_collect)&(times<cut_time)
 
             times += 1
-            #println(("iteration times = ",times))
+            println(("iteration times = ",times))
             disc_edge_previous = disc_edge_collect
 
             X = one_iteration(data,data_integer,graph,discrete_index,continuous_index,l_card,approx)

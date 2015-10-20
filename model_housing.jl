@@ -2,6 +2,7 @@ include("disc_BN_MODL.jl")
 include("likelihood_calculation.jl")
 include("iteration_2.jl")
 include("K2.jl")
+include("MDL_principle.jl")
 
 f = open("data/housing.data")
 
@@ -26,10 +27,19 @@ end
 
 close(f)
 
-#graph = [2,(2,3),(3,2,14),(3,2,7),(7,14,13),(3,2,9),4,(14,4,6),(3,7,8),(7,14,12),(3,5),(3,10),(12,1),(3,11)];
-#X = K2_w_discretization_compare(data,2,[1,2,3,5,6,7,8,10,11,12,13,14],10,5)
-#disc_edge = BN_discretizer_iteration_converge(data,graph,[4,9],[1,2,3,5,6,7,8,10,11,12,13,14],10);
+graph = [8,(8,5),(5,6),(8,2),(5,2,3),(8,7),(3,8,2,10),4,(10,12),(6,10,14),(14,13),(3,8,10,2,11),1,(10,11,3,2,9)];
+discrete_index = [4,9]
+continuous_index = [14,13,12,11,10,8,7,6,5,3,2,1]
+cut_time = 10
+my_disc_edge_w = BN_discretizer_iteration_converge(data,graph,discrete_index,continuous_index,cut_time)[2]
+println("my_w_done =========================== ")
+my_disc_edge_wo = BN_discretizer_iteration_converge(data,graph,discrete_index,continuous_index,cut_time,false)[2]
+println("my_wo_done =========================== ")
+MDL_disc =  MDL_discretizer_iteration_converge(data,graph,discrete_index,continuous_index,cut_time)[2]
+println("MDL_done =========================== ")
 
-graph = [2,(2,3),(3,2,14),(3,2,7),(7,14,13),(3,2,9),4,(14,4,6),(3,7,8),(7,14,12),(3,5),(3,10),(12,1),(3,11)];
-disc_edge = BN_discretizer_iteration_converge(data,graph,[4,9],[1,2,3,5,6,7,8,10,11,12,13,14],10);
-disc_edge = disc_edge[2]
+g = open("housing_result.txt","w")
+println(g,my_disc_edge_w)
+println(g,my_disc_edge_wo)
+println(g,MDL_disc)
+close(g)
