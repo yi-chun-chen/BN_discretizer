@@ -30,8 +30,6 @@ close(f)
 graph = [1,(1,14),4,(14,4,3),(3,10),(3,2),(10,2,3,8),(3,8,5),(8,7),(10,3,2,9),(14,1,13),(14,6),(10,12),(9,3,2,11)];
 discrete_index = [4,9]
 continuous_index = [1,2,3,5,6,7,8,10,11,12,13,14]
-<<<<<<< HEAD
-<<<<<<< HEAD
 cut_time = 10
 # my_disc_edge_w = BN_discretizer_iteration_converge(data,graph,discrete_index,continuous_index,cut_time)[2]
 # println("my_w_done =========================== ")
@@ -56,16 +54,3 @@ end
 Y1 = sample_from_discetization(graph,data,continuous_index,My_w,500)
 Y2 = sample_from_discetization(graph,data,continuous_index,My_wo,500)
 Y3 = sample_from_discetization(graph,data,continuous_index,MDL,500)
-=======
-=======
->>>>>>> origin/master
-order = graph_to_reverse_conti_order(graph,continuous_index)
-cut_time = 8
-my_disc_edge_w = BN_discretizer_iteration_converge(data,graph,discrete_index,order,cut_time)[2]
-println("my_w_done =========================== ")
-my_disc_edge_wo = BN_discretizer_iteration_converge(data,graph,discrete_index,order,cut_time,false)[2]
-println("my_wo_done =========================== ")
-MDL_disc =  MDL_discretizer_iteration_converge(data,graph,discrete_index,order,cut_time)[2]
-println("MDL_done =========================== ")
->>>>>>> origin/master
-
