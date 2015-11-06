@@ -482,7 +482,11 @@ function mi_table_2(data,parents,child_spouse_set)
 end
 
 function H(p)
+    if p == 0
+        return 0
+    else
         return -p*log(p) - (1-p)*log(1-p)
+    end
 end
 
 function MDL_discretizer(continuous,data_matrix,parent_set,child_spouse_set)
@@ -691,8 +695,8 @@ function MDL_discretizer_rep(continuous,data_matrix,parent_set,child_spouse_set)
 
 
         for l = 1:Ni
-                full_length_k_intval[l] += l_code*parent_cardi*(l-1) + l_code*child_cardi*l +
-                                           log(l) + lfact(Ni-1) - lfact(l-1) - lfact(Ni-l)
+                full_length_k_intval[l] += l_code*parent_cardi*(l-1) + l_code*child_cardi*l + (Ni-1)*H((l-1)/(Ni-1))
+                                           #log(l) + lfact(Ni-1) - lfact(l-1) - lfact(Ni-l)
                                            #(Ni-1)*H((l-1)/(Ni-1))
         end
 
