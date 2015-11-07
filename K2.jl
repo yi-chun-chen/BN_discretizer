@@ -2,22 +2,6 @@ include("disc_BN_MODL.jl")
 include("likelihood_calculation.jl")
 include("iteration_2.jl")
 
-function rand_seq(N)
-
-        seq = Array(Int64,N)
-
-        i = 1
-        seq[1] = 1 + round(Int64, div(N * rand(),1) )
-
-        while i < N
-                number = 1 + round(Int64,div( N*rand(),1))
-                if ~(number in seq[1:i])
-                        i += 1
-                        seq[i] = number
-                end
-        end
-        return seq
-end
 
 
 

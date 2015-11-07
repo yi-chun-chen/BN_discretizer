@@ -1,6 +1,7 @@
 include("disc_BN_MODL.jl")
 include("likelihood_calculation.jl")
-include("MDL_principle.jl")
+include("iteration_2.jl")
+include("K2.jl")
 
 f = open("data/abalone.data")
 
@@ -13,8 +14,10 @@ for i = 1 : 4177
                 if j == 1
                         if str_element[1] == "M"
                                 data[i,1] = 1
-                        else
+                        elseif str_element[1] == "F"
                                 data[i,1] = 2
+                        else
+                                data[i,1] = 3
                         end
                 elseif j == 9
                         last_one = str_element[9]
@@ -25,41 +28,25 @@ for i = 1 : 4177
         end
 end
 
-sex = Array(Int64,4177)
-for i = 1 : 4177
-        sex[i] = data[i,1]
-end
 
-leng = Array(Float64,4177)
-for i = 1 : 4177
-        leng[i] = data[i,2]
-end
-
-diameter = equal_width_disc(data[:,3],5)
-height = equal_width_disc(data[:,4],4)
-who_w = equal_width_disc(data[:,5],5)
-shu_w = equal_width_disc(data[:,6],3)
-vis_w = equal_width_disc(data[:,7],4)
-she_w = equal_width_disc(data[:,8],5)
-age = equal_width_disc(data[:,9],4)
-
-p = sortperm(leng)
-leng = leng[p]
-diameter = diameter[p]
-height = height[p]
-who_w = who_w[p]
-shu_w = shu_w[p]
-vis_w = vis_w[p]
-she_w = she_w[p]
-
-data_matrix = [sex age diameter height who_w shu_w vis_w she_w]
-
-parent_set = [1,2]
-child_spouse_set = [(5,3),(6,4),(7,4),8]
-
-graph = [1 2 (1,2,3) 4 5 (3,4,6) (3,5,7) (3,5,8) (3,9)]
-
-X = BN_discretizer_free_number_rep(leng,data_matrix,parent_set,child_spouse_set)
-#MDL_discretizer_rep(leng,data_matrix,parent_set,child_spouse_set)
-#0.075 0.4225 0.4775 0.5325 0.5725 0.5975 0.6175 0.6325 0.6775 0.7175 0.815
 close(f)
+
+discrete_index = [1]
+continuous_index = [2,3,4,5,6,7,8,9]
+#data_integer = Array(Int64,size(data))
+# for i = 1 : 9
+#        if i in continuous_index
+#                  data_integer[:,i] = equal_width_disc(data[:,i],3)
+#        else
+#                  data_integer[:,i] = data[:,i]
+#       end
+#end
+
+#times = 500
+#X = K2(data_integer,8,times)
+
+graph = [5,4,(5,8),(5,8,7),(5,3),(5,7,6),(3,8,6,9),(3,2),(3,6,1)]
+Order = graph_to_reverse_conti_order(graph,continuous_index)
+cut_time = 5
+
+my_disc_edge_w = BN_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time)[2]

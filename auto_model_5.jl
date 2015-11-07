@@ -62,25 +62,58 @@ for i = 1 : 392
         data[i,7] = year[i]
 end
 
-# graph = [1 2 3 (1,2,3,4) (4,5) (4,7,6)]
-# target = 3
-# parent_set = graph_to_markov(graph,target)[1]
-# child_spouse_set = graph_to_markov(graph,target)[2]
 
 discrete_index = [1,7]
 continuous_index = [2,3,4,5,6]
-times = 5
 
-#X = BN_discretizer_iteration(data,graph,discrete_index,continuous_index,times)
 
-graph = [1,(1,6),(1,6,5),(1,6,3),(1,6,7),(1,5,4),(1,6,2)];
+graph = [1,(1,2),(2,1,3),(2,5),(1,4),(4,1,5,7),(3,6)];
 Order = graph_to_reverse_conti_order(graph,continuous_index)
-
 cut_time = 5
+
+n_fold = 10
+data_group = cross_vali_data(n_fold,data)
+
+log_li_my_w = 0; log_li_my_wo = 0; log_li_MDL = 0
+for fold = 1 : n_fold
+    println("fold = ", fold,"==============================")
+    train_data = 0; test_data = 0
+    if fold == 1
+        test_data = data_group[fold]
+        train_data = data_group[2]
+        for j = 3 : n_fold
+            train_data = [train_data;data_group[j]]
+        end
+    else
+        test_data = data_group[fold]
+        train_data = data_group[1]
+        for j = 2 : n_fold
+            if j != fold
+                train_data = [train_data;data_group[j]]
+            end
+        end
+    end
+
+    my_w_disc_edge = BN_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time)[2]
+    my_wo_disc_edge = BN_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time)[2]
+    MDL_disc_edge = MDL_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time)[2]
+    reorder_my_w_edge = sort_disc_by_vorder(Order,my_w_disc_edge)
+    reorder_my_wo_edge = sort_disc_by_vorder(Order,my_wo_disc_edge)
+    reorder_MDL_edge = sort_disc_by_vorder(Order,MDL_disc_edge)
+    Li_my_w = likelihood_conti(graph,train_data,continuous_index,reorder_my_w_edge,test_data,1)
+    Li_my_wo = likelihood_conti(graph,train_data,continuous_index,reorder_my_wo_edge,test_data,1)
+    Li_MDL = likelihood_conti(graph,train_data,continuous_index,reorder_MDL_edge,test_data,1)
+    log_li_my_w += Li_my_w
+    log_li_my_wo += Li_my_wo
+    log_li_MDL += Li_MDL
+
+end
+
+println(log_li_my_w,log_li_my_wo,log_li_MDL)
 
 #my_disc_edge = BN_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time)[2]
 #my_disc_edge_wo = BN_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time,false)[2]
-MDL_disc =  MDL_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time)[2]
+#MDL_disc =  MDL_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time)[2]
 #MY_disc_edge_2_wo_approx = Array(Any,5)
 #MY_disc_edge_2_wo_approx[5] = [8.0,14.05,24.8]
 #MY_disc_edge_2_wo_approx[4] = [1613.0,2764.5,3030.0,3657.5,5140.0]

@@ -40,11 +40,18 @@ function cartesian_product(product_set)
 end
 
 function find_intval(x,disc)
-        for i = 1 : length(disc)-1
-               if (x >= disc[i])&(x < disc[i+1])
-                       return i
-               end
-        end
+    if x < disc[2]
+        return 1
+    end
+    if x >= disc[end-1]
+        return length(disc)-1
+    end
+
+    for i = 2 : length(disc)-2
+           if (x >= disc[i])&(x < disc[i+1])
+                   return i
+           end
+    end
 end
 
 function sampling_from_CPT(intval)
@@ -276,7 +283,7 @@ function likelihood_conti(graph,train_data,continuous_index,disc_edge,new_data,p
                         p = condi_collection[g_ind][sub_ind_set...]
 
                         LH_current += log(p)
-                        println(p)#if g_ind == 3; println(LH_current) ;end;
+                        #println(p)#if g_ind == 3; println(LH_current) ;end;
                         # Make a modification to continuous case
                         if (graph[g_ind][end] in continuous_index)
                                 l = graph[g_ind][end]
@@ -294,25 +301,29 @@ function likelihood_conti(graph,train_data,continuous_index,disc_edge,new_data,p
         return LH
 end
 
-data_matrix_conti =[
-[1 3 1.1 7.0 1];
-[2 4 1.2 3.4 1];
-[2 4 2.1 6.4 1];
-[1 3 2.5 6.1 1];
-[1 3 3.1 5.9 1];
-[1 4 4.2 6.9 2];
-[1 4 5.5 5.1 2];
-[2 4 6.6 7.9 2];
-[2 4 7.2 6.2 1];
-[2 4 2.1 7.3 1];
-[1 3 3.1 6.7 1];
-[2 3 4.2 6.7 1];
-]
+#data_matrix_conti =[
+#[1 3 1.1 7.0 1];
+#[2 4 1.2 3.4 1];
+#[2 4 2.1 6.4 1];
+#[1 3 2.5 6.1 1];
+#[1 3 3.1 5.9 1];
+#[1 4 4.2 6.9 2];
+#[1 4 5.5 5.1 2];
+#[2 4 6.6 7.9 2];
+#[2 4 7.2 6.2 1];
+#[2 4 2.1 7.3 1];
+#[1 3 3.1 6.7 1];
+#[2 3 4.2 6.7 1];
+#]
 #continuous_index = [3,4];
 #disc_edge = Array(Any,2)
 #disc_edge[1] = [1.1,5.0,7.2]
 #disc_edge[2] = [3.4,5.5,6.5,7.9]
-
+#new_data_matrix = [
+#[2 4 1.1 3.4 2];
+#[1 3 6.0 7.2 1];
+#]
+#li = likelihood_conti([3,(3,4),1,(3,2),(3,4,5)],data_matrix_conti,continuous_index,disc_edge,new_data_matrix,1)
 
 
 function sample_from_discetization(graph,train_data,continuous_index,disc_edge,number_of_samples,prior_number = 0)
@@ -392,3 +403,76 @@ end
 
 #X = likelihood_conti([3,(3,4),1,(3,2),(3,4,5)],data_matrix_conti,continuous_index,disc_edge,[1 3 6.0 7.2 1],1)
 #X = sample_from_discetization([3,(3,4),1,(4,2),(3,4,5)],data_matrix_conti,continuous_index,disc_edge,2)
+
+function sort_disc_by_vorder(continuous_order,disc_edge)
+      reorder_disc_edge = Array(Any,length(continuous_order))
+      for i = 1 : length(continuous_order)
+            num_less = 1
+            for j = 1 : length(continuous_order)
+                  if continuous_order[j] < continuous_order[i]
+                        num_less += 1
+                  end
+            end
+            reorder_disc_edge[num_less] = disc_edge[i]
+    end
+    return reorder_disc_edge
+end
+#disc_edge_test = Array(Any,5)
+#disc_edge_test[1] = [1.1,2.2,3.3]
+#disc_edge_test[2] = [3.2,5.5]
+#disc_edge_test[3] = [1,2,3]
+#X = sort_disc_by_vorder([6,2,3],disc_edge_test)
+
+function rand_seq(N)
+
+        seq = Array(Int64,N)
+
+        i = 1
+        seq[1] = 1 + round(Int64, div(N * rand(),1) )
+
+        while i < N
+                number = 1 + round(Int64,div( N*rand(),1))
+                if ~(number in seq[1:i])
+                        i += 1
+                        seq[i] = number
+                end
+        end
+        return seq
+end
+
+
+function cross_vali_data(n_fold,data)
+    N = length(data[:,1])
+    n = length(data[1,:])
+
+    data_store = Array(Any,n_fold)
+
+    fold_contains = Array(Int64,n_fold)
+    for i = 1 : n_fold-1
+        fold_contains[i] = i * round(Int64,N/n_fold)
+    end
+    fold_contains[end] = N
+
+    random_order = rand_seq(N)
+    for i = 1 : n_fold
+        if i < n_fold
+            data_fold = Array(Any,round(Int64,N/n_fold),n)
+        else
+            data_fold = Array(Any,N-fold_contains[end-1],n)
+        end
+
+        if i == 1
+            for j = 1 : fold_contains[i]
+                data_fold[j,:] = data[random_order[j],:]
+            end
+        else
+            k = 0
+            for j = fold_contains[i-1] + 1 : fold_contains[i]
+                k += 1
+                data_fold[k,:] = data[random_order[j],:]
+            end
+        end
+        data_store[i] = data_fold
+    end
+    return data_store
+end
