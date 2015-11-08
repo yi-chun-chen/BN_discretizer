@@ -27,20 +27,20 @@ end
 
 close(f)
 
-
+#
 #data_integer = Array(Int64,size(data))
-# for i = 1 : 14
-#        if i in continuous_index
-#                  data_integer[:,i] = equal_width_disc(data[:,i],3)
-#        else
-#                  data_integer[:,i] = data[:,i]
-#       end
+#for i = 1 : 14
+#      if i in continuous_index
+#                data_integer[:,i] = equal_width_disc(data[:,i],3)
+#      else
+#                 data_integer[:,i] = data[:,i]
+#      end
 #end
 
 #times = 1000
-#X = K2(data_integer,13,times)
+#X = K2(data_integer,2,times)
 
-graph = [8,(8,1),(1,11),(1,4),(1,2),(8,7),(1,14),(8,4,1,9),(1,3),(1,8,13),(14,1,6),(1,4,5),(1,12),(8,6,10)]
+graph = [4,(4,1),(1,14),(1,8),(1,8,13),(1,11),(14,1,6),(8,6,10),(1,4,5),(1,2),(8,7),(8,4,9),(1,3),(1,12)]
 Order = graph_to_reverse_conti_order(graph,continuous_index)
 cut_time = 10
 
@@ -48,7 +48,7 @@ n_fold = 10
 data_group = cross_vali_data(n_fold,data)
 
 log_li_my_w = 0; log_li_my_wo = 0; log_li_MDL = 0
-for fold = 1 : 1#n_fold
+for fold = 1 : n_fold
     println("fold = ", fold,"==============================")
     train_data = 0; test_data = 0
     if fold == 1
@@ -68,8 +68,8 @@ for fold = 1 : 1#n_fold
     end
 
     my_w_disc_edge = BN_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time)[2]
-    my_wo_disc_edge = BN_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time)[2]
-    MDL_disc_edge = MDL_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time)[2]
+    my_wo_disc_edge = BN_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time,false)[2]
+    MDL_disc_edge = MDL_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time)[2]
     reorder_my_w_edge = sort_disc_by_vorder(Order,my_w_disc_edge)
     reorder_my_wo_edge = sort_disc_by_vorder(Order,my_wo_disc_edge)
     reorder_MDL_edge = sort_disc_by_vorder(Order,MDL_disc_edge)
@@ -83,7 +83,7 @@ for fold = 1 : 1#n_fold
 
 end
 
-println(log_li_my_w,log_li_my_wo,log_li_MDL)
+#println(log_li_my_w,log_li_my_wo,log_li_MDL)
 
 #my_disc_edge_w = BN_discretizer_iteration_converge(data,graph,disc_index,Order,cut_time)[2]
 #my_disc_edge_wo = BN_discretizer_iteration_converge(data,graph,disc_index,Order,cut_time,false)[2]

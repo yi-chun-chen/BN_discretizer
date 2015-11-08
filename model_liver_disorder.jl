@@ -28,7 +28,19 @@ close(f)
 discrete_index = [7]
 continuous_index = [1,2,3,4,5,6]
 
-graph = [3,(3,5),1,(3,5,4),(4,7),(3,4,6),(5,6,2)]
+#data_integer = Array(Int64,size(data))
+#for i = 1 : 7
+#      if i in continuous_index
+#                data_integer[:,i] = equal_width_disc(data[:,i],2)
+#      else
+#                 data_integer[:,i] = data[:,i]
+#      end
+#end
+#
+#times = 1000
+#X = K2(data_integer,1,times)
+
+graph = [5,(5,2),(5,4),1,(4,3),(5,6),(4,7)]
 Order = graph_to_reverse_conti_order(graph,continuous_index)
 
 cut_time = 5
@@ -57,8 +69,8 @@ for fold = 1 : n_fold
     end
 
     my_w_disc_edge = BN_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time)[2]
-    my_wo_disc_edge = BN_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time)[2]
-    MDL_disc_edge = MDL_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time)[2]
+    my_wo_disc_edge = BN_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time,false)[2]
+    MDL_disc_edge = MDL_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time)[2]
     reorder_my_w_edge = sort_disc_by_vorder(Order,my_w_disc_edge)
     reorder_my_wo_edge = sort_disc_by_vorder(Order,my_wo_disc_edge)
     reorder_MDL_edge = sort_disc_by_vorder(Order,MDL_disc_edge)

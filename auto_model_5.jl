@@ -95,8 +95,8 @@ for fold = 1 : n_fold
     end
 
     my_w_disc_edge = BN_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time)[2]
-    my_wo_disc_edge = BN_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time)[2]
-    MDL_disc_edge = MDL_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time)[2]
+    my_wo_disc_edge = BN_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time,false)[2]
+    MDL_disc_edge = MDL_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time)[2]
     reorder_my_w_edge = sort_disc_by_vorder(Order,my_w_disc_edge)
     reorder_my_wo_edge = sort_disc_by_vorder(Order,my_wo_disc_edge)
     reorder_MDL_edge = sort_disc_by_vorder(Order,MDL_disc_edge)
@@ -106,6 +106,7 @@ for fold = 1 : n_fold
     log_li_my_w += Li_my_w
     log_li_my_wo += Li_my_wo
     log_li_MDL += Li_MDL
+    println(log_li_my_w,log_li_my_wo,log_li_MDL)
 
 end
 
