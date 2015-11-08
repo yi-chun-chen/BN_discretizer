@@ -67,7 +67,19 @@ discrete_index = [1,7]
 continuous_index = [2,3,4,5,6]
 
 
-graph = [1,(1,2),(2,1,3),(2,5),(1,4),(4,1,5,7),(3,6)];
+#data_integer = Array(Int64,size(data))
+#for i = 1 : 7
+#      if i in continuous_index
+#                data_integer[:,i] = equal_width_disc(data[:,i],9)
+#      else
+#                 data_integer[:,i] = data[:,i]
+#      end
+#end
+#
+#times = 1000
+#X = K2(data_integer,6,times)
+
+graph = [1,(1,2),(2,5),(2,3),(1,6),(1,4),(4,1,7)];
 Order = graph_to_reverse_conti_order(graph,continuous_index)
 cut_time = 5
 

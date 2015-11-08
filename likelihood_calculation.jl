@@ -106,7 +106,7 @@ function condi_prob_table(data_matrix,prior_number=0)
         for i = 1 : M
                 uniq_classes[i] = unique(data_matrix[:,i])
                 n_class[i] = length(uniq_classes[i])
-                uniq_classes_tuple[i] = tuple([1:1:n_class[i]]...)  ##### Might cause problem
+                uniq_classes_tuple[i] = tuple(collect(1:1:n_class[i])...)  ##### Might cause problem
         end
 
         # Count events
@@ -475,4 +475,88 @@ function cross_vali_data(n_fold,data)
         data_store[i] = data_fold
     end
     return data_store
+end
+
+
+
+function likelihood_conti_each(graph,train_data,continuous_index,disc_edge,new_data,prior_number=0)
+        # graph consists of tuple elements that has the form (a,b,c,d), where a,b,c are parents of d.
+        num_of_condi = length(graph)
+        condi_collection = Array(Any,num_of_condi)
+
+        train_data_discretized = Array(Int64,size(train_data))
+        for i = 1 : length(train_data[1,:])
+                if i in continuous_index
+                        index_in_disc_edge = findfirst(continuous_index,i)
+                        train_data_discretized[:,i] = continuous_to_discrete(train_data[:,i],
+                                                                              disc_edge[index_in_disc_edge])
+                else
+                        train_data_discretized[:,i] = train_data[:,i]
+                end
+        end
+
+        for i = 1 : num_of_condi
+                subgraph = graph[i]
+                sub_data_matrix = Array(Int64,length(train_data[:,1]),length(subgraph))
+                sub_data_matrix[:,1] = train_data_discretized[:,subgraph[1]]
+
+                for j = 2 : length(subgraph)
+                        sub_data_matrix[:,j] = train_data_discretized[:,subgraph[j]]
+                end
+
+                condi_collection[i] = condi_prob_table(sub_data_matrix,prior_number)
+        end
+
+        uniq_classes = Array(Any,length(train_data_discretized[1,:]))
+
+        for i = 1 : length(train_data[1,:])
+                uniq_classes[i] = unique(train_data_discretized[:,i])
+        end
+
+        LH = Array(Float64,length(new_data[:,1]))
+
+        for i = 1 : length(new_data[:,1])
+                LH_current = 0
+                index_set = Array(Int64,length(new_data[1,:]))
+
+
+                for j = 1 : length(index_set)
+                        if j in continuous_index
+                                index_in_disc_edge = findfirst(continuous_index,j)
+                                index_intval = find_intval(new_data[i,j],disc_edge[index_in_disc_edge])
+                                index_set[j] = findfirst(uniq_classes[j],index_intval)
+
+                        else
+                                index_set[j] = findfirst(uniq_classes[j],new_data[i,j])
+                        end
+                end
+
+                for g_ind = 1 : num_of_condi
+
+                        sub_ind_set = Array(Int64,length(graph[g_ind]))
+
+                        for k = 1 : length(graph[g_ind])
+                                sub_ind_set[k] = index_set[graph[g_ind][k]]
+                        end
+                        sub_ind_set = tuple(sub_ind_set...)
+
+                        p = condi_collection[g_ind][sub_ind_set...]
+
+                        LH_current += log(p)
+                        #println(p)#if g_ind == 3; println(LH_current) ;end;
+                        # Make a modification to continuous case
+                        if (graph[g_ind][end] in continuous_index)
+                                l = graph[g_ind][end]
+                                index_in_disc_edge = findfirst(continuous_index,l)
+                                index_intval = find_intval(new_data[i,l],disc_edge[index_in_disc_edge])
+                                span = disc_edge[index_in_disc_edge][index_intval+1] - disc_edge[index_in_disc_edge][index_intval]
+                                LH_current -= log(span)
+                        end
+                        #if g_ind == 3; println(LH_current) ;end;
+                end
+
+                LH[i] =  LH_current
+        end
+
+        return LH
 end

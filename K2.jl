@@ -212,17 +212,20 @@ function K2_one_iteration_discretization(order,u,data_matrix,continuous_index,cu
         # Initialize graph structure
         initial_lcard= 0
         data_discretized = Array(Int64,size(data_matrix))
-        for i = 1 : m
-                if ~(i in conti_index)
-                        data_discretized[:,i] = data[:,i]
-                        current_initial_lcard = length(unique(data[:,i]))
+        if (m - length(conti_index)) == 0
+            initial_lcard = round(Int64, log(m)+1)
+        else
+            for i = 1 : m
+                    if ~(i in conti_index)
+                            data_discretized[:,i] = data[:,i]
+                            current_initial_lcard = length(unique(data[:,i]))
 
-                        if current_initial_lcard > initial_lcard
-                                initial_lcard = current_initial_lcard
-                        end
-                end
+                            if current_initial_lcard > initial_lcard
+                                    initial_lcard = current_initial_lcard
+                            end
+                    end
+            end
         end
-
         for i = 1 : m
                 if i in conti_index
                         data_discretized[:,i] = equal_width_disc(data[:,i],initial_lcard)

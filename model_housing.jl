@@ -39,12 +39,12 @@ continuous_index = [1,2,3,5,6,7,8,10,11,12,13,14]
 #                data_integer[:,i] = data[:,i]
 #     end
 #end
-#times = 100
-#X = K2(data_integer,13,times)
+#times = 1000
+#X = K2(data_integer,3,times)
 
 
 #graph = [1,(1,14),4,(14,4,3),(3,10),(3,2),(10,2,3,8),(3,8,5),(8,7),(10,3,2,9),(14,1,13),(14,6),(10,12),(9,3,2,11)];
-graph = [8,(8,5),(5,6),(8,2),(5,2,3),(8,7),(3,8,2,10),4,(10,12),(6,10,14),(14,13),(3,8,10,2,11),1,(10,11,3,2,9)]
+graph = [5,(5,2),(5,8),(5,2,3),(3,5,2,9),(5,2,7),(9,3,2,10),(9,3,10,11),(7,13),1,(10,12),(13,14),4,(14,1,6)];
 discrete_index = [4,9]
 continuous_index = [1,2,3,5,6,7,8,10,11,12,13,14]
 cut_time = 10
@@ -74,8 +74,8 @@ for fold = 1 : n_fold
     end
 
     my_w_disc_edge = BN_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time)[2]
-    my_wo_disc_edge = BN_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time)[2]
-    MDL_disc_edge = MDL_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time)[2]
+    my_wo_disc_edge = BN_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time,false)[2]
+    MDL_disc_edge = MDL_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time)[2]
     reorder_my_w_edge = sort_disc_by_vorder(Order,my_w_disc_edge)
     reorder_my_wo_edge = sort_disc_by_vorder(Order,my_wo_disc_edge)
     reorder_MDL_edge = sort_disc_by_vorder(Order,MDL_disc_edge)
