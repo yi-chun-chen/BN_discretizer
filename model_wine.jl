@@ -40,7 +40,7 @@ close(f)
 #times = 1000
 #X = K2(data_integer,2,times)
 
-graph = [4,(4,1),(1,14),(1,8),(1,8,13),(1,11),(14,1,6),(8,6,10),(1,4,5),(1,2),(8,7),(8,4,9),(1,3),(1,12)]
+graph = [8,(8,1),(1,11),(1,4),(1,2),(8,7),(1,14),(8,4,1,9),(1,3),(1,8,13),(14,1,6),(1,4,5),(1,12),(8,6,10)]
 Order = graph_to_reverse_conti_order(graph,continuous_index)
 cut_time = 10
 
@@ -67,25 +67,31 @@ for fold = 1 : n_fold
         end
     end
 
-    my_w_disc_edge = BN_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time)[2]
-    my_wo_disc_edge = BN_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time,false)[2]
-    MDL_disc_edge = MDL_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time)[2]
-    reorder_my_w_edge = sort_disc_by_vorder(Order,my_w_disc_edge)
-    reorder_my_wo_edge = sort_disc_by_vorder(Order,my_wo_disc_edge)
-    reorder_MDL_edge = sort_disc_by_vorder(Order,MDL_disc_edge)
-    Li_my_w = likelihood_conti(graph,train_data,continuous_index,reorder_my_w_edge,test_data,1)
-    Li_my_wo = likelihood_conti(graph,train_data,continuous_index,reorder_my_wo_edge,test_data,1)
-    Li_MDL = likelihood_conti(graph,train_data,continuous_index,reorder_MDL_edge,test_data,1)
-    log_li_my_w += Li_my_w
-    log_li_my_wo += Li_my_wo
-    log_li_MDL += Li_MDL
-    println(log_li_my_w,log_li_my_wo,log_li_MDL)
+    #my_w_disc_edge = BN_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time)[2]
+    #my_wo_disc_edge = BN_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time,false)[2]
+    #MDL_disc_edge = MDL_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time)[2]
+    #reorder_my_w_edge = sort_disc_by_vorder(Order,my_w_disc_edge)
+    #reorder_my_wo_edge = sort_disc_by_vorder(Order,my_wo_disc_edge)
+    #reorder_MDL_edge = sort_disc_by_vorder(Order,MDL_disc_edge)
+    #Li_my_w = likelihood_conti(graph,train_data,continuous_index,reorder_my_w_edge,test_data,1)
+    #Li_my_wo = likelihood_conti(graph,train_data,continuous_index,reorder_my_wo_edge,test_data,1)
+    #Li_MDL = likelihood_conti(graph,train_data,continuous_index,reorder_MDL_edge,test_data,1)
+    #log_li_my_w += Li_my_w
+    #log_li_my_wo += Li_my_wo
+    #log_li_MDL += Li_MDL
+    #println(log_li_my_w,log_li_my_wo,log_li_MDL)
 
 end
 
 #println(log_li_my_w,log_li_my_wo,log_li_MDL)
 
-#my_disc_edge_w = BN_discretizer_iteration_converge(data,graph,disc_index,Order,cut_time)[2]
-#my_disc_edge_wo = BN_discretizer_iteration_converge(data,graph,disc_index,Order,cut_time,false)[2]
-#MDL_disc =  MDL_discretizer_iteration_converge(data,graph,disc_index,Order,cut_time)[2]
+#my_disc_edge_w = BN_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time)[2]
+#my_disc_edge_wo = BN_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time,false)[2]
+#MDL_disc =  MDL_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time)[2]
 
+#reorder_my_w_edge = sort_disc_by_vorder(Order,my_disc_edge)
+#reorder_my_wo_edge = sort_disc_by_vorder(Order,my_disc_edge_wo)
+#reorder_MDL_edge = sort_disc_by_vorder(Order,MDL_disc)
+
+u = 13; times = 20;
+A = K2_w_discretization(data,u,continuous_index,times,cut_time,false)
