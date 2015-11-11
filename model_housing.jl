@@ -30,6 +30,9 @@ close(f)
 discrete_index = [4,9]
 continuous_index = [1,2,3,5,6,7,8,10,11,12,13,14]
 
+cut_time = 7
+u = 13; times = 5;
+A = K2_w_discretization(data,u,continuous_index,times,cut_time,false)
 
 #data_integer = Array(Int64,size(data))
 #for i = 1 : 14
@@ -44,11 +47,11 @@ continuous_index = [1,2,3,5,6,7,8,10,11,12,13,14]
 
 
 #graph = [1,(1,14),4,(14,4,3),(3,10),(3,2),(10,2,3,8),(3,8,5),(8,7),(10,3,2,9),(14,1,13),(14,6),(10,12),(9,3,2,11)];
-graph = [5,(5,2),(5,8),(5,2,3),(3,5,2,9),(5,2,7),(9,3,2,10),(9,3,10,11),(7,13),1,(10,12),(13,14),4,(14,1,6)];
-discrete_index = [4,9]
-continuous_index = [1,2,3,5,6,7,8,10,11,12,13,14]
-cut_time = 10
-Order = graph_to_reverse_conti_order(graph,continuous_index)
+#graph = [5,(5,2),(5,8),(5,2,3),(3,5,2,9),(5,2,7),(9,3,2,10),(9,3,10,11),(7,13),1,(10,12),(13,14),4,(14,1,6)];
+#discrete_index = [4,9]
+#continuous_index = [1,2,3,5,6,7,8,10,11,12,13,14]
+#cut_time = 10
+#Order = graph_to_reverse_conti_order(graph,continuous_index)
 
 #n_fold = 10
 #data_group = cross_vali_data(n_fold,data)
@@ -91,9 +94,9 @@ Order = graph_to_reverse_conti_order(graph,continuous_index)
 #
 #println(log_li_my_w,log_li_my_wo,log_li_MDL)
 
-my_w_disc_edge = BN_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time)[2]
-my_wo_disc_edge = BN_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time,false)[2]
-MDL_disc_edge = MDL_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time)[2]
-reorder_my_w_edge = sort_disc_by_vorder(Order,my_w_disc_edge)
-reorder_my_wo_edge = sort_disc_by_vorder(Order,my_wo_disc_edge)
-reorder_MDL_edge = sort_disc_by_vorder(Order,MDL_disc_edge)
+#my_w_disc_edge = BN_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time)[2]
+#my_wo_disc_edge = BN_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time,false)[2]
+#MDL_disc_edge = MDL_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time)[2]
+#reorder_my_w_edge = sort_disc_by_vorder(Order,my_w_disc_edge)
+#reorder_my_wo_edge = sort_disc_by_vorder(Order,my_wo_disc_edge)
+#reorder_MDL_edge = sort_disc_by_vorder(Order,MDL_disc_edge)

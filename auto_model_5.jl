@@ -133,7 +133,7 @@ cut_time = 5
 #reorder_my_wo_edge = sort_disc_by_vorder(Order,my_disc_edge_wo)
 ##reorder_MDL_edge = sort_disc_by_vorder(Order,MDL_disc)
 
-u = 6; times = 20;
+u = 6; times = 30;
 A = K2_w_discretization(data,u,continuous_index,times,cut_time,false)
 
 #MY_disc_edge_2_wo_approx = Array(Any,5)
