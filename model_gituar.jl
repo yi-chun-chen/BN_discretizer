@@ -22,7 +22,7 @@ cut_time = 5
 continuous_index = [1,2,3,4,5,6,7]
 u = 2
 times = 10
-A = K2_w_discretization(data,u,continuous_index,times,cut_time)
+A = K2_w_discretization(data,u,continuous_index,times,cut_time,false)
 
 graph = A[2]
 my_disc = A[3]
