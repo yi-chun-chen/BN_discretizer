@@ -31,7 +31,7 @@ discrete_index = [4,9]
 continuous_index = [1,2,3,5,6,7,8,10,11,12,13,14]
 
 cut_time = 7
-u = 13; times = 5;
+u = 3; times = 40;
 A = K2_w_discretization(data,u,continuous_index,times,cut_time,false)
 
 #data_integer = Array(Int64,size(data))
