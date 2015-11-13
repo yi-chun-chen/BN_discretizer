@@ -44,28 +44,28 @@ graph = [8,(8,1),(1,11),(1,4),(1,2),(8,7),(1,14),(8,4,1,9),(1,3),(1,8,13),(14,1,
 Order = graph_to_reverse_conti_order(graph,continuous_index)
 cut_time = 10
 
-n_fold = 10
-data_group = cross_vali_data(n_fold,data)
+#n_fold = 10
+#data_group = cross_vali_data(n_fold,data)
 
-log_li_my_w = 0; log_li_my_wo = 0; log_li_MDL = 0
-for fold = 1 : n_fold
-    println("fold = ", fold,"==============================")
-    train_data = 0; test_data = 0
-    if fold == 1
-        test_data = data_group[fold]
-        train_data = data_group[2]
-        for j = 3 : n_fold
-            train_data = [train_data;data_group[j]]
-        end
-    else
-        test_data = data_group[fold]
-        train_data = data_group[1]
-        for j = 2 : n_fold
-            if j != fold
-                train_data = [train_data;data_group[j]]
-            end
-        end
-    end
+#log_li_my_w = 0; log_li_my_wo = 0; log_li_MDL = 0
+#for fold = 1 : n_fold
+    #println("fold = ", fold,"==============================")
+    #train_data = 0; test_data = 0
+    #if fold == 1
+    #    test_data = data_group[fold]
+    #    train_data = data_group[2]
+    #    for j = 3 : n_fold
+    #        train_data = [train_data;data_group[j]]
+    #    end
+    #else
+    #    test_data = data_group[fold]
+    #    train_data = data_group[1]
+    #    for j = 2 : n_fold
+    #        if j != fold
+    #            train_data = [train_data;data_group[j]]
+    #        end
+    #    end
+    #end
 
     #my_w_disc_edge = BN_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time)[2]
     #my_wo_disc_edge = BN_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time,false)[2]

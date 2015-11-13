@@ -125,16 +125,16 @@ cut_time = 5
 
 #println(log_li_my_w,log_li_my_wo,log_li_MDL)
 
-#my_disc_edge = BN_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time)[2]
-#my_disc_edge_wo = BN_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time,false)[2]
+my_disc_edge = BN_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time)[2]
+my_disc_edge_wo = BN_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time,false)[2]
 #MDL_disc =  MDL_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time)[2]
 
 #reorder_my_w_edge = sort_disc_by_vorder(Order,my_disc_edge)
 #reorder_my_wo_edge = sort_disc_by_vorder(Order,my_disc_edge_wo)
 ##reorder_MDL_edge = sort_disc_by_vorder(Order,MDL_disc)
 
-u = 6; times = 30;
-A = K2_w_discretization(data,u,continuous_index,times,cut_time,false)
+#u = 6; times = 30;
+#A = K2_w_discretization(data,u,continuous_index,times,cut_time,false)
 
 #MY_disc_edge_2_wo_approx = Array(Any,5)
 #MY_disc_edge_2_wo_approx[5] = [8.0,14.05,24.8]
