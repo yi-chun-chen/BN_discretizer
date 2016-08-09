@@ -695,7 +695,7 @@ function MDL_discretizer_rep(continuous,data_matrix,parent_set,child_spouse_set)
 
 
         for l = 1:Ni
-                full_length_k_intval[l] += l_code*parent_cardi*(l-1) + l_code*child_cardi*l + (Ni-1)*H((l-1)/(Ni-1))
+                full_length_k_intval[l] += l_code*parent_cardi*(l-1) + l_code*child_cardi*l + (Ni-1)*H((l-1)/(Ni-1)) + log(l)
                                            #log(l) + lfact(Ni-1) - lfact(l-1) - lfact(Ni-l)
                                            #(Ni-1)*H((l-1)/(Ni-1))
         end

@@ -187,7 +187,7 @@ end
 function BN_discretizer_fixed_number(continuous,data_matrix,parent_set,child_spouse_set,desired_num_bin)
         p_data_model = BN_discretizer_p_data_model(data_matrix,parent_set,child_spouse_set)
         #lambda = div(largest_class_value(data_matrix),2)
-        lambda = largest_class_value(data_matrix)
+        lambda = largest_class_value(data_matrix) * 2
         split_on_intval = prior_of_intval(continuous,lambda)
         N = length(continuous)
         not_split_on_intval = ones(Float64,N) - split_on_intval
@@ -264,7 +264,7 @@ end
 function BN_discretizer_free_number_rep(continuous,data_matrix,parent_set,child_spouse_set,approx = true)
         p_data_model = BN_discretizer_p_data_model(data_matrix,parent_set,child_spouse_set,approx)
         #lambda = div(largest_class_value(data_matrix),2)
-        lambda = largest_class_value(data_matrix)
+        lambda = largest_class_value(data_matrix) #* 4
         split_on_intval = prior_of_intval(continuous,lambda)
         N = length(continuous)
         not_split_on_intval = ones(Float64,N) - split_on_intval
@@ -473,6 +473,18 @@ function equal_width_edge(continuous,m)
         end
         return edge
 end
+
+function equal_width_edge_no_sort(continuous,m)
+        min_value = minimum(continuous)
+        max_value = maximum(continuous)
+        span = max_value - min_value
+        edge = [min_value]
+        for i = 1 : m
+                edge = [edge, min_value + (span/m)*i]
+        end
+        return edge
+end
+
 
 ##### Adding an extra term for P(real_value_data | discretized_value_data)
 

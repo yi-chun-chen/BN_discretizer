@@ -30,15 +30,28 @@ close(f)
 discrete_index = [4,9]
 continuous_index = [1,2,3,5,6,7,8,10,11,12,13,14]
 
-<<<<<<< HEAD
-#cut_time = 7
+
+data_2 = Array(Any,size(data))
+for j = 1 : 14
+    if j in continuous_index
+        min_v = minimum(data[:,j])
+        max_v = maximum(data[:,j])
+        for i = 1 : 506
+            data_2[i,j] = (data[i,j] - min_v)/max_v
+        end
+    else
+        for i = 1 : 506
+            data_2[i,j] = data[i,j]
+        end
+    end
+end
+
+
+
+
+cut_time = 10
 #u = 13; times = 5;
 #A = K2_w_discretization(data,u,continuous_index,times,cut_time,false)
-=======
-cut_time = 7
-u = 3; times = 40;
-A = K2_w_discretization(data,u,continuous_index,times,cut_time,false)
->>>>>>> origin/master
 
 #data_integer = Array(Int64,size(data))
 #for i = 1 : 14
@@ -53,52 +66,56 @@ A = K2_w_discretization(data,u,continuous_index,times,cut_time,false)
 
 
 #graph = [1,(1,14),4,(14,4,3),(3,10),(3,2),(10,2,3,8),(3,8,5),(8,7),(10,3,2,9),(14,1,13),(14,6),(10,12),(9,3,2,11)];
-#graph = [5,(5,2),(5,8),(5,2,3),(3,5,2,9),(5,2,7),(9,3,2,10),(9,3,10,11),(7,13),1,(10,12),(13,14),4,(14,1,6)];
+graph = [5,(5,2),(5,8),(5,2,3),(3,5,2,9),(5,2,7),(9,3,2,10),(9,3,10,11),(7,13),1,(10,12),(13,14),4,(14,1,6)];
 #discrete_index = [4,9]
 #continuous_index = [1,2,3,5,6,7,8,10,11,12,13,14]
 #cut_time = 10
-#Order = graph_to_reverse_conti_order(graph,continuous_index)
+Order = graph_to_reverse_conti_order(graph,continuous_index)
 
-#n_fold = 10
-#data_group = cross_vali_data(n_fold,data)
+n_fold = 2
+data_group = cross_vali_data(n_fold,data_2)
 
-#log_li_my_w = 0; log_li_my_wo = 0; log_li_MDL = 0
-#for fold = 1 : n_fold
-#    println("fold = ", fold,"==============================")
-#    train_data = 0; test_data = 0
-#    if fold == 1
-#        test_data = data_group[fold]
-#        train_data = data_group[2]
-#        for j = 3 : n_fold
-#            train_data = [train_data;data_group[j]]
-#        end
-#    else
-#        test_data = data_group[fold]
-#        train_data = data_group[1]
-#        for j = 2 : n_fold
-#            if j != fold
-#                train_data = [train_data;data_group[j]]
-#            end
-#        end
-#    end
+log_li_my_w = 0; log_li_my_wo = 0; log_li_MDL = 0
+for fold = 1 : n_fold
+    println("fold = ", fold,"==============================")
+    train_data = 0; test_data = 0
+    if fold == 1
+        test_data = data_group[fold]
+        train_data = data_group[2]
+        #for j = 3 : n_fold
+        #    train_data = [train_data;data_group[j]]
+        #end
+    else
+        test_data = data_group[fold]
+        train_data = data_group[1]
+        #for j = 2 : n_fold
+        #    if j != fold
+        #        train_data = [train_data;data_group[j]]
+        #    end
+        #end
+    end
+
+    my_w_disc_edge = BN_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time)[2]
+    my_wo_disc_edge = BN_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time,false)[2]
+    MDL_disc_edge = MDL_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time)[2]
+    reorder_my_w_edge = sort_disc_by_vorder(Order,my_w_disc_edge)
+    reorder_my_wo_edge = sort_disc_by_vorder(Order,my_wo_disc_edge)
+    reorder_MDL_edge = sort_disc_by_vorder(Order,MDL_disc_edge)
+    Li_my_w = likelihood_conti(graph,train_data,continuous_index,reorder_my_w_edge,test_data,1)
+    Li_my_wo = likelihood_conti(graph,train_data,continuous_index,reorder_my_wo_edge,test_data,1)
+    Li_MDL = likelihood_conti(graph,train_data,continuous_index,reorder_MDL_edge,test_data,1)
+    log_li_my_w += Li_my_w
+    log_li_my_wo += Li_my_wo
+    log_li_MDL += Li_MDL
+    for k = 1 : 12
+        println(length(reorder_my_w_edge[k]),"_",length(reorder_my_wo_edge[k]),"_",reorder_MDL_edge[k])
+    end
+
+    println(log_li_my_w,"_",log_li_my_wo,"_",log_li_MDL)
+
+end
 #
-#    my_w_disc_edge = BN_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time)[2]
-#    my_wo_disc_edge = BN_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time,false)[2]
-#    MDL_disc_edge = MDL_discretizer_iteration_converge(train_data,graph,discrete_index,Order,cut_time)[2]
-#    reorder_my_w_edge = sort_disc_by_vorder(Order,my_w_disc_edge)
-#    reorder_my_wo_edge = sort_disc_by_vorder(Order,my_wo_disc_edge)
-#    reorder_MDL_edge = sort_disc_by_vorder(Order,MDL_disc_edge)
-#    Li_my_w = likelihood_conti(graph,train_data,continuous_index,reorder_my_w_edge,test_data,1)
-#    Li_my_wo = likelihood_conti(graph,train_data,continuous_index,reorder_my_wo_edge,test_data,1)
-#    Li_MDL = likelihood_conti(graph,train_data,continuous_index,reorder_MDL_edge,test_data,1)
-#    log_li_my_w += Li_my_w
-#    log_li_my_wo += Li_my_wo
-#    log_li_MDL += Li_MDL
-#    println(log_li_my_w,log_li_my_wo,log_li_MDL)
-#
-#end
-#
-#println(log_li_my_w,log_li_my_wo,log_li_MDL)
+println(log_li_my_w,log_li_my_wo,log_li_MDL)
 
 #my_w_disc_edge = BN_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time)[2]
 #my_wo_disc_edge = BN_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time,false)[2]

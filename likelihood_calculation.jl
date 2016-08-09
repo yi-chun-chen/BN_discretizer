@@ -215,11 +215,14 @@ function continuous_to_discrete(data,bin_edge_1)
                 end
                 data_discrete[i] = index
         end
+
         return data_discrete
 end
 
 
 function likelihood_conti(graph,train_data,continuous_index,disc_edge,new_data,prior_number=0)
+
+
         # graph consists of tuple elements that has the form (a,b,c,d), where a,b,c are parents of d.
         num_of_condi = length(graph)
         condi_collection = Array(Any,num_of_condi)
@@ -228,8 +231,7 @@ function likelihood_conti(graph,train_data,continuous_index,disc_edge,new_data,p
         for i = 1 : length(train_data[1,:])
                 if i in continuous_index
                         index_in_disc_edge = findfirst(continuous_index,i)
-                        train_data_discretized[:,i] = continuous_to_discrete(train_data[:,i],
-                                                                              disc_edge[index_in_disc_edge])
+                        train_data_discretized[:,i] = continuous_to_discrete(train_data[:,i],disc_edge[index_in_disc_edge])
                 else
                         train_data_discretized[:,i] = train_data[:,i]
                 end
@@ -559,4 +561,76 @@ function likelihood_conti_each(graph,train_data,continuous_index,disc_edge,new_d
         end
 
         return LH
+end
+
+
+function small_big_data(N_small,data)
+    N = length(data[:,1])
+    n = length(data[1,:])
+
+    N_big = N - N_small
+
+    data_small_store = Array(Any,N_small,n)
+    data_big_store = Array(Any,N_big,n)
+
+    random_order = rand_seq(N)
+
+    for i = 1 : N
+        index_for_i = random_order[i]
+        if i <= N_small
+            data_small_store[i,:] = data[index_for_i,:]
+        else
+            j = i - N_small
+            data_big_store[j,:] = data[index_for_i,:]
+        end
+    end
+
+    return (data_small_store,data_big_store)
+end
+
+function small_data(N_small,data)
+    N = length(data[:,1])
+    n = length(data[1,:])
+
+    data_small_store = Array(Any,N_small,n)
+
+    random_order = rand_seq(N)
+
+    for i = 1 : N_small
+        index_for_i = random_order[i]
+        data_small_store[i,:] = data[index_for_i,:]
+    end
+
+    return data_small_store
+end
+
+function count_edges(disc_result)
+
+    n_v = length(disc_result)
+    n_edges = 0
+
+    for i = 1 : n_v
+        n_edges += length(disc_result[i]) - 2
+    end
+
+    return n_edges
+end
+
+function likelihood_one_conti(train_conti,disc,test_conti,prior_count=1)
+
+    bin_counts = ones(Int64,length(disc)-1)
+    for i = 1 : length(train_conti)
+        ii = find_intval(train_conti[i],disc)
+        bin_counts[ii] += 1
+    end
+
+    total = sum(bin_counts)
+
+    li = 0
+    for j = 1 : length(test_conti)
+        jj = find_intval(test_conti[j],disc)
+        li += log(bin_counts[jj]/total) - log(disc[jj+1]-disc[jj])
+    end
+
+    return li
 end

@@ -1,5 +1,5 @@
 function Gaussian_distrib(mean,dev,n)
-        A = Array(FloatingPoint,n)
+        A = Array(Float64,n)
         for i = 1 : n
                 A[i] = dev * randn() + mean
         end

@@ -3,20 +3,22 @@ include("likelihood_calculation.jl")
 include("iteration_2.jl")
 include("K2.jl")
 
-f = open("data/bupa.data")
+f = open("data/wine.data")
 
 x = readlines(f)
-data = Array(Any,345,7)
-for i = 1 : 345
+discrete_index = [1]
+continuous_index = [2,3,4,5,6,7,8,9,10,11,12,13,14]
+data = Array(Any,178,14)
+for i = 1 : 178
          str = x[i]
          println(str)
          str_element = split(str,",")
-         for j = 1 : 7
-                 if j == 7
-                         last_one = str_element[7]
-                         data[i,7] = round(Int64,float(split(last_one,"\n")[1]))
-                 #elseif j == 6
-                 #        data[i,6] = round(Int64,float(str_element[j]))
+         for j = 1 : 14
+                 if j == 14
+                         last_one = str_element[14]
+                         data[i,14] = float(split(last_one,"\n")[1])
+                 elseif j in discrete_index
+                         data[i,j] = round(Int64,float(str_element[j]))
                  else
                          data[i,j] = float(str_element[j])
                  end
@@ -25,34 +27,48 @@ end
 
 close(f)
 
-discrete_index = [7]
-continuous_index = [1,2,3,4,5,6]
+data_2 = Array(Any,size(data))
+for j = 1 : 14
+    if j in continuous_index
+        min_v = minimum(data[:,j])
+        max_v = maximum(data[:,j])
+        for i = 1 : 178
+            data_2[i,j] = (data[i,j] - min_v)/max_v
+        end
+    else
+        for i = 1 : 178
+            data_2[i,j] = data[i,j]
+        end
+    end
+end
 
+
+#
 #data_integer = Array(Int64,size(data))
-#for i = 1 : 7
+#for i = 1 : 14
 #      if i in continuous_index
-#                data_integer[:,i] = equal_width_disc(data[:,i],2)
+#                data_integer[:,i] = equal_width_disc(data[:,i],3)
 #      else
 #                 data_integer[:,i] = data[:,i]
 #      end
 #end
-#
+
 #times = 1000
-#X = K2(data_integer,1,times)
+#X = K2(data_integer,2,times)
 
-#cut_time = 5
-#u = 6; times = 50;
-#A = K2_w_discretization(data,u,continuous_index,times,cut_time,false)
+graph = [8,(8,1),(1,11),(1,4),(1,2),(8,7),(1,14),(8,4,1,9),(1,3),(1,8,13),(14,1,6),(1,4,5),(1,12),(8,6,10)];
 
-
-
-graph = [3,(3,5),1,(3,5,4),(4,7),(3,4,6),(5,6,2)]
+#graph = [8,(8,1),(1,11),(1,4),(1,2),(8,7),(1,14),(8,4,1,9),(1,3),(1,8,13),(14,1,6),(1,4,5),(1,12),(8,6,10)]
 Order = graph_to_reverse_conti_order(graph,continuous_index)
+cut_time = 10
 
-cut_time = 5
+#wo_scale = BN_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time,false)[2]
+#w_scale = BN_discretizer_iteration_converge(data_2,graph,discrete_index,Order,cut_time,false)[2]
+
+
 
 n_fold = 10
-data_group = cross_vali_data(n_fold,data)
+data_group = cross_vali_data(n_fold,data_2)
 
 log_li_my_w = 0; log_li_my_wo = 0; log_li_MDL = 0
 for fold = 1 : n_fold
@@ -92,18 +108,19 @@ end
 
 println(log_li_my_w,log_li_my_wo,log_li_MDL)
 
-my_w_disc_edge = BN_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time)[2]
-my_wo_disc_edge = BN_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time,false)[2]
-MDL_disc_edge = MDL_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time)[2]
-reorder_my_w_edge = sort_disc_by_vorder(Order,my_w_disc_edge)
-reorder_my_wo_edge = sort_disc_by_vorder(Order,my_wo_disc_edge)
-reorder_MDL_edge = sort_disc_by_vorder(Order,MDL_disc_edge)
+#my_disc_edge_w = BN_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time)[2]
+#my_disc_edge_wo = BN_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time,false)[2]
+#MDL_disc =  MDL_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time)[2]
 
-##############
-### Result ###
-##############
+#reorder_my_w_edge = sort_disc_by_vorder(Order,my_disc_edge)
+#reorder_my_wo_edge = sort_disc_by_vorder(Order,my_disc_edge_wo)
+#reorder_MDL_edge = sort_disc_by_vorder(Order,MDL_disc)
 
-# graph = [3,(3,5),1,(3,5,4),(4,7),(3,4,6),(5,6,2)];
-# Likelihood = (-8188.168714487385,-9166.648376038698)
-# my_discretization = ([65.0,84.0,103.0],[23.0,138.0],[4.0,41.5,49.0,95.0,155.0],[5.0,31.5,44.0,82.0],[5.0,50.5,72.0,297.0],[0.0,6.5,20.0])
-# MDL_discretization = ([65.0,84.0,103.0],[23.0,138.0],[4.0,155.0],[5.0,82.0],[5.0,297.0],[0.0,20.0])
+#u = 13; times = 20;
+#A = K2_w_discretization(data,u,continuous_index,times,cut_time,false)
+
+#########################
+### Data Generating 1 ###
+#########################
+
+

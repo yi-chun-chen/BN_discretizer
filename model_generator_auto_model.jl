@@ -81,17 +81,56 @@ end
 
 #println(log_li_my_w,log_li_my_wo,log_li_MDL)
 
-graph = [2,(2,3),(3,5),(5,1),(1,5,3,7),(3,4),(4,6),8]
-Order = graph_to_reverse_conti_order(graph,continuous_index)
-cut_time = 8
-
 #my_w_disc_edge = BN_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time)[2]
-my_wo_disc_edge = BN_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time,false)[2]
+#my_wo_disc_edge = BN_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time,false)[2]
 #MDL_disc_edge = MDL_discretizer_iteration_converge(data,graph,discrete_index,Order,cut_time)[2]
 #reorder_my_w_edge = sort_disc_by_vorder(Order,my_w_disc_edge)
-reorder_my_wo_edge = sort_disc_by_vorder(Order,my_wo_disc_edge)
+#reorder_my_wo_edge = sort_disc_by_vorder(Order,my_wo_disc_edge)
 #reorder_MDL_edge = sort_disc_by_vorder(Order,MDL_disc_edge)
 
-#Y1 = sample_from_discetization(graph,data,continuous_index,reorder_my_wo_edge,2000)
+#########################
+### Data Generating 1 ###
+#########################
 
-#writecsv("housing_exp1_ourmethod.dat", Y1)
+graph = [2,(2,3),(3,5),(5,1),(1,5,3,7),(3,4),(4,6),8]
+
+my_disc = Array(Any,5)
+my_disc[1] = [9.0,15.25,17.65,20.9,25.65,28.9,46.6]
+my_disc[2] = [68.0,70.5,93.5,109.0,159.5,259.0,284.5,455.0]
+my_disc[3] = [46.0,71.5,99.0,127.0,230.0]
+my_disc[4] = [1613.0,2115.0,2480.5,2959.5,3657.5,5140.0]
+my_disc[5] = [8.0,12.35,13.75,16.05,22.85,24.8]
+
+MDL_disc = Array(Any,5)
+MDL_disc[1] = [9.0,46.6]
+MDL_disc[2] = [68.0,455.0]
+MDL_disc[3] = [46.0,230.0]
+MDL_disc[4] = [1613.0,5140.0]
+MDL_disc[5] = [8.0,24.8]
+
+Y1 = sample_from_discetization(graph,data,continuous_index,my_disc,2000)
+Y2 = sample_from_discetization(graph,data,continuous_index,MDL_disc,2000)
+
+writecsv("autoMPG_exp1_ourmethod.dat", Y1)
+writecsv("autoMPG_exp2_MDLmethod.dat", Y2)
+writecsv("autoMPG_raw.dat", data)
+
+
+
+#########################
+### Data Generating 2 ###
+#########################
+
+#graph = [2,(2,5),(2,5,1),(2,5,8),(1,8,7),(2,8,3),(2,5,3,8,4),(4,2,5,6)]
+
+#my_k2_disc = Array(Any,5)
+#my_k2_disc[1] = [9.0,17.55,23.95,46.6]
+#my_k2_disc[2] = [68.0,134.5,159.5,169.5,259.0,264.5,455.0]
+#my_k2_disc[3] = [46.0,115.5,230.0]
+#my_k2_disc[4] = [1613.0,2764.5,3030.0,3923.5,5140.0]
+#my_k2_disc[5] = [8.0,14.05,24.8]
+
+#Y1 = sample_from_discetization(graph,data,continuous_index,my_k2_disc,2000)
+
+#writetable("autoMPG_exp2_ourmethod.dat", Y1, separator = ',', header = false)
+
